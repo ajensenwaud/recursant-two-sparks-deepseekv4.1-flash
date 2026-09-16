@@ -1,0 +1,15 @@
+**
+!runtime/
+!runtime/**
+!licenses/
+!licenses/**
+!scripts/
+!scripts/*.py
+!tools/
+!tools/*.py
+!tools/retained-model-contract.json
+!configs/
+!configs/source-model.json
+!pins.json
+**/__pycache__
+**/*.pyc

@@ -1,0 +1,26 @@
+{
+  "deployment": "dsv41-vision",
+  "image": "dsv41-vision:retained-v1",
+  "api_bind": "127.0.0.1",
+  "api_port": 8000,
+  "master_port": 29524,
+  "startup_timeout_seconds": 900,
+  "nodes": [
+    {
+      "ssh_host": "rank-zero",
+      "fabric_ip": "192.0.2.10",
+      "socket_interface": "fabric0",
+      "rdma_hca": "rdma0",
+      "model_path": "/srv/models/dsv41-exl3-mcg2",
+      "cache_path": "/srv/cache/dsv41-vision"
+    },
+    {
+      "ssh_host": "rank-one",
+      "fabric_ip": "192.0.2.11",
+      "socket_interface": "fabric0",
+      "rdma_hca": "rdma0",
+      "model_path": "/srv/models/dsv41-exl3-mcg2",
+      "cache_path": "/srv/cache/dsv41-vision"
+    }
+  ]
+}

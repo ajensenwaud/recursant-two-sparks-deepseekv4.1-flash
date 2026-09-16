@@ -1,0 +1,7 @@
+{
+  "status": "unpublished",
+  "image": null,
+  "source_manifest_sha256": null,
+  "model": null,
+  "note": "Intentionally unresolved. No image URL, model namespace, revision or digest is fabricated. Publication requires licensing/source review, build and GPU validation, authorized upload and remote readback."
+}

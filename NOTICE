@@ -1,0 +1,53 @@
+DeepSeek V4.1 two-GB10 vision integration — local release candidate
+
+This integration is not an official DeepSeek, NVIDIA, vLLM, FlashInfer,
+ExLlamaV3, sfxnz, Victor Cruz, or Mia's AI Lab release or endorsement.
+
+PROVENANCE
+- DeepSeek-AI: DeepSeek-V4.1-Flash model and tokenizer, MIT license, pinned
+  official source revision dba1be0a40aa45a94ad051997016db3960a90277.
+  No model weights are redistributed by this repository.
+- vLLM contributors: digest-pinned day-zero serving runtime; installed package
+  carries Apache-2.0. Exact license reproduced in licenses/vLLM-Apache-2.0.txt.
+  Full public source revision/wheel provenance remains a release blocker.
+- Victor Cruz (vcruz305): vllm-exl3 d3cfd394920360d69f820d2dc96f8292a9e10283.
+  This pin's LICENSE is GNU AGPL version 3, NOT MIT. The repository also carries
+  LICENSE.APACHE-2.0 and component-specific notices; their presence is not a
+  license-choice grant. See licenses/vllm-exl3/ for unchanged upstream texts.
+- Mia's AI Lab and Turboderp: retained upstream attribution for routed-expert
+  EXL3 serving, pointer tables, Fat GEMM, trellis/MCG mathematics and n-gram
+  embedding codec. licenses/vllm-exl3/THIRD_PARTY_NOTICES.md is deliberately
+  retained despite removal of experiment Markdown; it is a legal notice.
+- Turboderp / turboderp-org: ExLlamaV3 at
+  5be886578ec80324c2c715269387be2058724b6e, MIT. The ARM64 patch replaces
+  unsupported x86 CPU code paths; it does not claim to implement them on ARM.
+- FlashInfer contributors: v0.6.18 kernels/autotuner, Apache-2.0 and included
+  third-party notices, reproduced in licenses/FlashInfer-Apache-2.0.txt.
+- sfxnz: DeepSeek-V4.1-Flash-EXL3-vLLM-2x-DGX-Spark recipe at
+  5f8f3769fc49e84d2160bb301ba98d986eecbac9 and geometry/setup changes at
+  3aee5f68d839e3334651a2ce671a6559c4dc094f. The upstream recipe's LICENSE is
+  the reproduced DeepSeek MIT text. Its integration authorship/license scope
+  warrants review; no additional copyright grant is inferred.
+
+MODIFICATIONS (retained adaptation, September 2026)
+- Pinned image plus disk-backed Engram and ARM64 compatibility integration.
+- Mode-aware vision configuration and bounded wide-SWA attention fallback;
+  sparse-indexer page/top-k compatibility changes.
+- Retained narrow dense MXFP8 autotuning and HIGH DSpark K5 configuration.
+- vllm-exl3 native geometry eligibility widened from 4096 / 1024-or-2048 to
+  positive multiples of 128 (actual V4.1 TP2 is 5120 x 1152); native backend
+  selected with bounded post-return execution counters. The complete modified
+  Python file is runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm_exl3/exl3.py.
+- Quantization sidecar/selection/resume safety fixes and a new guarded wrapper.
+- Explicit download/build/configure/launch/verify controls and CPU tests.
+
+The exact source-file SHA256 inventory is runtime/source-manifest.json.
+Source is retained in the built image under /opt/src and in this repository's
+runtime/rootfs overlay. No precompiled private ELF, wheel, image, or tar archive
+is included. Before offering a modified AGPL-backed network service, obtain a
+license/compliance review and provide the required Corresponding Source offer.
+A README link alone is not asserted to discharge every AGPL obligation.
+
+NVIDIA CUDA/container components are external dependencies under their own
+terms. This repository does not relicense them; review the base image's
+NGC-DL-CONTAINER-LICENSE and component notices before distributing built images.

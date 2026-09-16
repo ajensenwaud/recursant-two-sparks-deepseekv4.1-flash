@@ -1,0 +1,300 @@
+{
+  "scope": "all publication files except this manifest and .git",
+  "files": [
+    {
+      "path": ".dockerignore",
+      "bytes": 201,
+      "sha256": "06a9ecfd945d83d235a2d24ba76053afc435345a196ce6de657af9b5429da9ea"
+    },
+    {
+      "path": ".github/workflows/cpu.yml",
+      "bytes": 687,
+      "sha256": "7e2ebd6e72d2c0a52573becb3bde780d2e07df341123f313a6849fd79ba8d4a8"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 371,
+      "sha256": "098a999f6008a2faefb7439b113466a5d2191fa585271cb55b39311fcff6b11b"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 574,
+      "sha256": "9a6af0c1c00d40c49b2a4b095ed63c2a9e5765e709f74767735bfeb991d58d8c"
+    },
+    {
+      "path": "NOTICE",
+      "bytes": 3471,
+      "sha256": "0863706025f5ee720d5bd6e48736b9fc62aa7c765b2aac5d1dadefb2629c6e69"
+    },
+    {
+      "path": "README.md",
+      "bytes": 10073,
+      "sha256": "5e42d2b0460e7bddc29e4991f7e915d2b57036dc8bb2224a2c282417871c5002"
+    },
+    {
+      "path": "configs/cluster.example.json",
+      "bytes": 671,
+      "sha256": "19668ce54784cffe1cb607ba9feb7ea112dbddc9978607ed34ac426a90da01d0"
+    },
+    {
+      "path": "configs/release.json",
+      "bytes": 313,
+      "sha256": "2d7854d5c45c382c5a55dfec04b7f0fee7282bb03cebc11a53f37240a0f77cea"
+    },
+    {
+      "path": "configs/source-model.json",
+      "bytes": 12385,
+      "sha256": "81b58c30699c8d2864f6335e0768cde230ebde8e8e01e86cc3ba42e7e4ea532c"
+    },
+    {
+      "path": "licenses/DeepSeek-MIT.txt",
+      "bytes": 1084,
+      "sha256": "f2c6c602815669d292889e5be8c802f2ed950653b77999b1584e8e6aed25d040"
+    },
+    {
+      "path": "licenses/ExLlamaV3-MIT.txt",
+      "bytes": 1065,
+      "sha256": "27a32b6263fcd96c79d3beeecf221c4366780bdf15ad51986f48650bd7369bff"
+    },
+    {
+      "path": "licenses/FlashInfer-Apache-2.0.txt",
+      "bytes": 12390,
+      "sha256": "f3514f24f2b94d09c409abbf4020cf600e4059098c697110eb91a4a2b235fbb7"
+    },
+    {
+      "path": "licenses/vLLM-Apache-2.0.txt",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "licenses/vllm-exl3/LICENSE",
+      "bytes": 31719,
+      "sha256": "cf0b6664ce73f379c829d162e2c738dcd867448fbc2ee3962ef2b000297a6083"
+    },
+    {
+      "path": "licenses/vllm-exl3/LICENSE.APACHE-2.0",
+      "bytes": 8869,
+      "sha256": "230a88fc02af8381245b5d611f2bfe553975da6dfd64d61c15428cf4d9e9e6c5"
+    },
+    {
+      "path": "licenses/vllm-exl3/NOTICE",
+      "bytes": 989,
+      "sha256": "2a30702aef1ca3af34bc324c160cb0908841dad92dc7871b005cd177e4fa695b"
+    },
+    {
+      "path": "licenses/vllm-exl3/THIRD_PARTY_NOTICES.md",
+      "bytes": 5300,
+      "sha256": "3c23458d09b0874676be2936ac1520232b02c94006ecd2818f5647b6cf3e6aaa"
+    },
+    {
+      "path": "pins.json",
+      "bytes": 2443,
+      "sha256": "caa4304f7fa96013ac9830ec41a4b6ba99fc4eea41c9e20117763f300e8cb1e8"
+    },
+    {
+      "path": "runtime/Dockerfile",
+      "bytes": 3258,
+      "sha256": "9840f6da3e59909e0f8fbdee455b9d226219efc5b90b8fc705925a922df08a54"
+    },
+    {
+      "path": "runtime/native-setup.py",
+      "bytes": 2170,
+      "sha256": "211b9a1821c5696e195ca3d77136ffe0e4f3c36c056e2592e30de446139ac7e1"
+    },
+    {
+      "path": "runtime/rootfs/etc/python3.12/sitecustomize.py",
+      "bytes": 7655,
+      "sha256": "a5a0f483df598f96268f0ca1a3e3aa0271077c56672de24aea1ad95441da1cf8"
+    },
+    {
+      "path": "runtime/rootfs/opt/dsv41-patch/apply_engram_disk.py",
+      "bytes": 7395,
+      "sha256": "ab03e50fb5a43c9a2757c6977891612b9c6d3c13b0e41118ed3cbbae386ccf43"
+    },
+    {
+      "path": "runtime/rootfs/opt/dsv41-patch/engram_disk.py",
+      "bytes": 7571,
+      "sha256": "74cd76791da718e3b0528c1d17c6333824c9672e5b906ee3213a7baccc719ab0"
+    },
+    {
+      "path": "runtime/rootfs/opt/dsv41-patch/engram_helper.py",
+      "bytes": 4091,
+      "sha256": "f97e085c0f308df25e058cf55484ffc4357f91489cb921174911c116cf9128ec"
+    },
+    {
+      "path": "runtime/rootfs/opt/dsv41-patch/fix_vllm_exl3_setup.py",
+      "bytes": 1427,
+      "sha256": "245b8dd73836ecd955c89f379cfde1c3adae18240d29e8f497faa97e0381d051"
+    },
+    {
+      "path": "runtime/rootfs/opt/dsv41-patch/patch_exllamav3_aarch64.py",
+      "bytes": 5873,
+      "sha256": "e106c49c9694271508d396221e8c4182b3a01755685effd16c26da17b6c0c0c2"
+    },
+    {
+      "path": "runtime/rootfs/opt/dsv41-patch/sitecustomize.py",
+      "bytes": 7655,
+      "sha256": "a5a0f483df598f96268f0ca1a3e3aa0271077c56672de24aea1ad95441da1cf8"
+    },
+    {
+      "path": "runtime/rootfs/opt/dsv41-patch/sm120_page.py",
+      "bytes": 4753,
+      "sha256": "d189e34946c7485862e226ce3aeb6f398152063f7ef36561a6602251d382cbe7"
+    },
+    {
+      "path": "runtime/rootfs/opt/dsv41-patch/upstream_apply_engram_patch.py",
+      "bytes": 6176,
+      "sha256": "316d068d6ecd8b66fbf129f41b78e8c46d35e8f7a84ad5c7bac9b02fdd02d74e"
+    },
+    {
+      "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm/config/model.py",
+      "bytes": 106327,
+      "sha256": "0c3ffdbde70980e5e91c763296fbd18f838a5be5bd3ff383c36ca038342ec56c"
+    },
+    {
+      "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm/model_executor/layers/sparse_attn_indexer.py",
+      "bytes": 37890,
+      "sha256": "7b4798198a4ae8f204481766e3c8569b6e461597c117f9043149548e49331bbe"
+    },
+    {
+      "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm/model_executor/layers/sparse_attn_indexer_kpool.py",
+      "bytes": 43147,
+      "sha256": "b931a69ec58d59c589b5fac5a269b775584d593cba4875bc99cd4235cb5faf15"
+    },
+    {
+      "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm/model_executor/model_loader/weight_utils.py",
+      "bytes": 60132,
+      "sha256": "f81fc36b853c999b44311eb98d1a412bc6cf7492e31b069bd1b0a2ad9476266d"
+    },
+    {
+      "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm/models/deepseek_v4_1/common/engram.py",
+      "bytes": 46916,
+      "sha256": "04d532f1b4560323f7773d3bd1a36121f1322edd644edf8553d39e57d201c3a3"
+    },
+    {
+      "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm/models/deepseek_v4_1/common/engram_disk.py",
+      "bytes": 7571,
+      "sha256": "74cd76791da718e3b0528c1d17c6333824c9672e5b906ee3213a7baccc719ab0"
+    },
+    {
+      "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm/models/deepseek_v4_1/nvidia/flashinfer_sparse.py",
+      "bytes": 41034,
+      "sha256": "a84aa57f49dd385076129cb51ee657c34f100e579c98cda463e0268cff129674"
+    },
+    {
+      "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm_exl3/exl3.py",
+      "bytes": 130198,
+      "sha256": "4c88b6b631955065d5602b6a2e4b7f91b7477630e1e10a7bf820d65e7ec21bd6"
+    },
+    {
+      "path": "runtime/source-manifest.json",
+      "bytes": 7492,
+      "sha256": "48a62af111a51b170df3b27e2bdc0063a2ec1df365282628ba76c28132b636d0"
+    },
+    {
+      "path": "scripts/artifacts.py",
+      "bytes": 6957,
+      "sha256": "ce946dca3e0180dfa64fcca185fa493b4960d8e579c8ff03769a213e4881c173"
+    },
+    {
+      "path": "scripts/benchmark.py",
+      "bytes": 5301,
+      "sha256": "582e6a649cb1df6220badfc44c42ff536f65db10c21d731ad9efd682dad78de9"
+    },
+    {
+      "path": "scripts/build.py",
+      "bytes": 2927,
+      "sha256": "9367799f4ef3ec189d5a28af051c76c28d01bff39ca872c5dd36f009728e5e74"
+    },
+    {
+      "path": "scripts/check_model.py",
+      "bytes": 4338,
+      "sha256": "9adc6d888ba4fca9188d1f0dcb0d1bcf3df95e59769ef335df6b9fd5b6eda47b"
+    },
+    {
+      "path": "scripts/cluster.py",
+      "bytes": 19731,
+      "sha256": "f98efb5f143be26fa26e33e2dde295d326183493dd6ed59deef72ac848a4ff8f"
+    },
+    {
+      "path": "scripts/download.py",
+      "bytes": 2492,
+      "sha256": "f6524a57b22cda05d307c6a11ca21bca77e4772777965ea97e14780a8e85f9e1"
+    },
+    {
+      "path": "scripts/dsv41.py",
+      "bytes": 7523,
+      "sha256": "638002ef499d023df555b1c89c75efa11291ada6cbc9b01d60dd5be10abf4bcb"
+    },
+    {
+      "path": "scripts/prepare.py",
+      "bytes": 8503,
+      "sha256": "5c7c6bc1748b5b500ceb4301880b867dd72c89c82e3986310858e70653c01cdd"
+    },
+    {
+      "path": "scripts/runtime_check.py",
+      "bytes": 9564,
+      "sha256": "86f99b15c9bfc080ae102edd8d4222d7c9317051dc826092493ad452fd72d491"
+    },
+    {
+      "path": "scripts/verify.py",
+      "bytes": 7438,
+      "sha256": "7b8b47e833742db921eee633680fe5b63aad1ab91b62fe82cc805bf008a713ae"
+    },
+    {
+      "path": "tests/test_existing_bind.py",
+      "bytes": 1557,
+      "sha256": "241b6cecbf11e34e34cf8d34666b54f4e24bd6b10f497892d23947da96bc731d"
+    },
+    {
+      "path": "tests/test_frontend.py",
+      "bytes": 7447,
+      "sha256": "b2c77b56d45999c8b8679910992d212e4aadd77e2c1c0248cd72d76c4d47795f"
+    },
+    {
+      "path": "tests/test_local_prebuilt.py",
+      "bytes": 3034,
+      "sha256": "5c8157ada4b5e2044188756ff3d490b4882fd073be301cd70fd2e9b3b0116524"
+    },
+    {
+      "path": "tests/test_publication.py",
+      "bytes": 29992,
+      "sha256": "8e2c9d505b4c68375e8ea859b059547a55c7b240c69c3228748c36ddaa204117"
+    },
+    {
+      "path": "tests/test_recipe.py",
+      "bytes": 10067,
+      "sha256": "6e76cb2ec22f5b533c52d3fcf10fdf93957b2cf949861b932b63ec396025446a"
+    },
+    {
+      "path": "tools/check_exl3_shard.py",
+      "bytes": 1839,
+      "sha256": "910fdf7bece72ffa967a0d047ac953cbf52edebf57562758e2ecd6161cdad46b"
+    },
+    {
+      "path": "tools/mxfp4.py",
+      "bytes": 2129,
+      "sha256": "470ddb57972eed4639fb0b9d1fa95bcfefcb9c2e01c8d050e685bb5b466359a0"
+    },
+    {
+      "path": "tools/pack_meta.py",
+      "bytes": 2593,
+      "sha256": "11e7de1b3b875ae5bcdb9c66d551c5eeefd3537773659ba880574c4bd3e054e9"
+    },
+    {
+      "path": "tools/quantize_experts_exl3.py",
+      "bytes": 21390,
+      "sha256": "b447d3b09462c1153d9800cb176ccab978c98f364571062f70b6c6b14b1f492b"
+    },
+    {
+      "path": "tools/rebuild_index.py",
+      "bytes": 1442,
+      "sha256": "471a85fabd042d2072005684d762d681fe4eb9aa192de0ec191e9085d9ed46c3"
+    },
+    {
+      "path": "tools/retained-model-contract.json",
+      "bytes": 268574,
+      "sha256": "21aed25702b3c8c0fe8c05f04a37c3215adc7ad64f718559818c011c52f78163"
+    }
+  ]
+}

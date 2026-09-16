@@ -1,0 +1,162 @@
+[
+  {
+    "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm_exl3/exl3.py",
+    "sha256": "4c88b6b631955065d5602b6a2e4b7f91b7477630e1e10a7bf820d65e7ec21bd6",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm/config/model.py",
+    "sha256": "0c3ffdbde70980e5e91c763296fbd18f838a5be5bd3ff383c36ca038342ec56c",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm/models/deepseek_v4_1/common/engram_disk.py",
+    "sha256": "74cd76791da718e3b0528c1d17c6333824c9672e5b906ee3213a7baccc719ab0",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm/models/deepseek_v4_1/common/engram.py",
+    "sha256": "04d532f1b4560323f7773d3bd1a36121f1322edd644edf8553d39e57d201c3a3",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm/models/deepseek_v4_1/nvidia/flashinfer_sparse.py",
+    "sha256": "a84aa57f49dd385076129cb51ee657c34f100e579c98cda463e0268cff129674",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm/model_executor/layers/sparse_attn_indexer_kpool.py",
+    "sha256": "b931a69ec58d59c589b5fac5a269b775584d593cba4875bc99cd4235cb5faf15",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm/model_executor/layers/sparse_attn_indexer.py",
+    "sha256": "7b4798198a4ae8f204481766e3c8569b6e461597c117f9043149548e49331bbe",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/usr/local/lib/python3.12/dist-packages/vllm/model_executor/model_loader/weight_utils.py",
+    "sha256": "f81fc36b853c999b44311eb98d1a412bc6cf7492e31b069bd1b0a2ad9476266d",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/etc/python3.12/sitecustomize.py",
+    "sha256": "a5a0f483df598f96268f0ca1a3e3aa0271077c56672de24aea1ad95441da1cf8",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/opt/dsv41-patch/upstream_apply_engram_patch.py",
+    "sha256": "316d068d6ecd8b66fbf129f41b78e8c46d35e8f7a84ad5c7bac9b02fdd02d74e",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/opt/dsv41-patch/patch_exllamav3_aarch64.py",
+    "sha256": "e106c49c9694271508d396221e8c4182b3a01755685effd16c26da17b6c0c0c2",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/opt/dsv41-patch/apply_engram_disk.py",
+    "sha256": "ab03e50fb5a43c9a2757c6977891612b9c6d3c13b0e41118ed3cbbae386ccf43",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/opt/dsv41-patch/engram_helper.py",
+    "sha256": "f97e085c0f308df25e058cf55484ffc4357f91489cb921174911c116cf9128ec",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/opt/dsv41-patch/sitecustomize.py",
+    "sha256": "a5a0f483df598f96268f0ca1a3e3aa0271077c56672de24aea1ad95441da1cf8",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/opt/dsv41-patch/fix_vllm_exl3_setup.py",
+    "sha256": "245b8dd73836ecd955c89f379cfde1c3adae18240d29e8f497faa97e0381d051",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/opt/dsv41-patch/engram_disk.py",
+    "sha256": "74cd76791da718e3b0528c1d17c6333824c9672e5b906ee3213a7baccc719ab0",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "runtime/rootfs/opt/dsv41-patch/sm120_page.py",
+    "sha256": "d189e34946c7485862e226ce3aeb6f398152063f7ef36561a6602251d382cbe7",
+    "upstream": "retained-source; see NOTICE and pins.json"
+  },
+  {
+    "path": "licenses/vllm-exl3/LICENSE",
+    "sha256": "cf0b6664ce73f379c829d162e2c738dcd867448fbc2ee3962ef2b000297a6083",
+    "upstream": "vcruz305/vllm-exl3@d3cfd394920360d69f820d2dc96f8292a9e10283"
+  },
+  {
+    "path": "licenses/vllm-exl3/LICENSE.APACHE-2.0",
+    "sha256": "230a88fc02af8381245b5d611f2bfe553975da6dfd64d61c15428cf4d9e9e6c5",
+    "upstream": "vcruz305/vllm-exl3@d3cfd394920360d69f820d2dc96f8292a9e10283"
+  },
+  {
+    "path": "licenses/vllm-exl3/NOTICE",
+    "sha256": "2a30702aef1ca3af34bc324c160cb0908841dad92dc7871b005cd177e4fa695b",
+    "upstream": "vcruz305/vllm-exl3@d3cfd394920360d69f820d2dc96f8292a9e10283"
+  },
+  {
+    "path": "licenses/vllm-exl3/THIRD_PARTY_NOTICES.md",
+    "sha256": "3c23458d09b0874676be2936ac1520232b02c94006ecd2818f5647b6cf3e6aaa",
+    "upstream": "vcruz305/vllm-exl3@d3cfd394920360d69f820d2dc96f8292a9e10283"
+  },
+  {
+    "path": "runtime/native-setup.py",
+    "sha256": "211b9a1821c5696e195ca3d77136ffe0e4f3c36c056e2592e30de446139ac7e1",
+    "upstream": "vcruz305/vllm-exl3 pinned source with retained setup adjustment"
+  },
+  {
+    "path": "licenses/DeepSeek-MIT.txt",
+    "sha256": "f2c6c602815669d292889e5be8c802f2ed950653b77999b1584e8e6aed25d040",
+    "upstream": "deepseek-ai/DeepSeek-V4.1-Flash@dba1be0a40aa45a94ad051997016db3960a90277"
+  },
+  {
+    "path": "licenses/ExLlamaV3-MIT.txt",
+    "sha256": "27a32b6263fcd96c79d3beeecf221c4366780bdf15ad51986f48650bd7369bff",
+    "upstream": "turboderp-org/exllamav3@5be886578ec80324c2c715269387be2058724b6e"
+  },
+  {
+    "path": "licenses/FlashInfer-Apache-2.0.txt",
+    "sha256": "f3514f24f2b94d09c409abbf4020cf600e4059098c697110eb91a4a2b235fbb7",
+    "upstream": "flashinfer-ai/flashinfer@v0.6.18"
+  },
+  {
+    "path": "licenses/vLLM-Apache-2.0.txt",
+    "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "upstream": "installed digest-pinned vLLM distribution"
+  },
+  {
+    "path": "tools/quantize_experts_exl3.py",
+    "sha256": "b447d3b09462c1153d9800cb176ccab978c98f364571062f70b6c6b14b1f492b",
+    "upstream": "sfxnz recipe@5f8f3769fc49e84d2160bb301ba98d986eecbac9 with retained local safety fixes; publication review fixes (not a retained runtime byte-copy)"
+  },
+  {
+    "path": "tools/mxfp4.py",
+    "sha256": "470ddb57972eed4639fb0b9d1fa95bcfefcb9c2e01c8d050e685bb5b466359a0",
+    "upstream": "sfxnz recipe@5f8f3769fc49e84d2160bb301ba98d986eecbac9 with retained local safety fixes; publication review fixes (not a retained runtime byte-copy)"
+  },
+  {
+    "path": "tools/pack_meta.py",
+    "sha256": "11e7de1b3b875ae5bcdb9c66d551c5eeefd3537773659ba880574c4bd3e054e9",
+    "upstream": "sfxnz recipe@5f8f3769fc49e84d2160bb301ba98d986eecbac9 with retained local safety fixes"
+  },
+  {
+    "path": "tools/rebuild_index.py",
+    "sha256": "471a85fabd042d2072005684d762d681fe4eb9aa192de0ec191e9085d9ed46c3",
+    "upstream": "sfxnz recipe@5f8f3769fc49e84d2160bb301ba98d986eecbac9 with retained local safety fixes"
+  },
+  {
+    "path": "tools/check_exl3_shard.py",
+    "sha256": "910fdf7bece72ffa967a0d047ac953cbf52edebf57562758e2ecd6161cdad46b",
+    "upstream": "sfxnz recipe@5f8f3769fc49e84d2160bb301ba98d986eecbac9 with retained local safety fixes"
+  },
+  {
+    "path": "tools/retained-model-contract.json",
+    "sha256": "21aed25702b3c8c0fe8c05f04a37c3215adc7ad64f718559818c011c52f78163",
+    "upstream": "retained 188245-tensor header/config census; no payload or quality attestation"
+  }
+]

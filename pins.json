@@ -1,0 +1,56 @@
+{
+  "base_image": "vllm/vllm-openai:deepseekv41-flash-0909@sha256:d84a123255b822fc22508635218000187221794f59c0694c33b0650d1e377d58",
+  "runtime_version": "0.1.dev20904+g179dd0fa9",
+  "runtime_source_commit": null,
+  "python": "3.12",
+  "cuda": "13.0.1",
+  "torch": "2.13.0+cu130",
+  "triton": "3.7.1",
+  "flashinfer-python": "0.6.18",
+  "plugin": {
+    "repository": "https://github.com/vcruz305/vllm-exl3.git",
+    "revision": "d3cfd394920360d69f820d2dc96f8292a9e10283",
+    "version": "0.4.2"
+  },
+  "exllama": {
+    "repository": "https://github.com/turboderp-org/exllamav3.git",
+    "revision": "5be886578ec80324c2c715269387be2058724b6e",
+    "version": "1.4.9"
+  },
+  "upstream_recipe": {
+    "repository": "https://github.com/sfxnz/DeepSeek-V4.1-Flash-EXL3-vLLM-2x-DGX-Spark",
+    "revision": "5f8f3769fc49e84d2160bb301ba98d986eecbac9",
+    "geometry_revision": "3aee5f68d839e3334651a2ce671a6559c4dc094f"
+  },
+  "apt": {
+    "cuda-nvdisasm-13-0": "13.0.85-1",
+    "git": "1:2.43.0-1ubuntu7.3",
+    "libcusparse-dev-13-0": "12.6.3.3-1",
+    "libcusolver-dev-13-0": "12.0.4.66-1",
+    "python3.12-dev": "3.12.3-1ubuntu0.16",
+    "libpython3.12-dev": "3.12.3-1ubuntu0.16"
+  },
+  "historical_native_wheel": {
+    "sha256": "1239a6f1937718e88f0963b48826267f467bdcad2722fd693eae02c5e106dcfb",
+    "public_url": null,
+    "elf_sha256": "773755afd6afba1bc83e7e3a40af6b2996a8ab24665035cf8b34002047749435",
+    "note": "Evidence only; new source builds need not reproduce fatbin bookkeeping hashes."
+  },
+  "retained_model": {
+    "format": "EXL3 MCG 2-bit",
+    "source_revision": "dba1be0a40aa45a94ad051997016db3960a90277",
+    "public_exact_pack": null,
+    "converted_matrices": 46080,
+    "shards": 48,
+    "bytes": 358107269776,
+    "conversion_quality": "bounded retained-pack validation only; fresh conversion not certified"
+  },
+  "release_blockers": [
+    "Select integration license and satisfy modified AGPL plugin source-offer obligations.",
+    "Resolve public vLLM source commit and wheel provenance for digest-pinned day-zero image.",
+    "Lock downloadable apt artifacts by SHA256 and confirm their availability.",
+    "Provide exact retained pack or validate an independent fresh conversion; public pack is not substituted.",
+    "Clean build, both-rank kernel tests, first start from final launcher and security-default compatibility remain untested.",
+    "Independent numerical and installer/security reviews required."
+  ]
+}

@@ -1,0 +1,10 @@
+ORIGINAL INTEGRATION LICENSE: NOT YET SELECTED
+
+This local release candidate is not licensed for public distribution as a whole.
+The project owner must select terms for original integration code and resolve
+compatibility with the modified AGPL-3.0 vllm-exl3 component before publication.
+No copyright owner, year, email address, or blanket MIT grant is invented here.
+
+This statement does not replace, restrict, or relicense rights granted by the
+upstream copyright holders. Third-party files retain their original licenses.
+Read NOTICE and the exact texts under licenses/.
