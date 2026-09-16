@@ -1,4 +1,10 @@
-DeepSeek V4.1 two-GB10 vision integration — local release candidate
+DeepSeek V4.1 two-GB10 vision integration
+
+ORIGINAL INTEGRATION LICENSE
+Original integration code is licensed under GNU Affero General Public License
+version 3 only (SPDX-License-Identifier: AGPL-3.0-only). See the complete LICENSE.
+Third-party components retain their own licenses and notices below. This grant
+does not relicense model weights, upstream code, CUDA, or container dependencies.
 
 This integration is not an official DeepSeek, NVIDIA, vLLM, FlashInfer,
 ExLlamaV3, sfxnz, Victor Cruz, or Mia's AI Lab release or endorsement.

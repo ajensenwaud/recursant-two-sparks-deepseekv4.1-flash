@@ -83,7 +83,7 @@ def create_argv(c,rank,image,owner):
 
 
 def ssh(n,args,timeout=60,check=True,input=None):
-    r=subprocess.run(['ssh','-o','BatchMode=yes','-o','ConnectTimeout=10',n['ssh_host'],shlex.join(args)],
+    r=subprocess.run(['ssh','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o','ConnectTimeout=10',n['ssh_host'],shlex.join(args)],
                      input=input,capture_output=True,text=True,timeout=timeout)
     if check and r.returncode:
         # No remote stdout/stderr (possibly credentials) in exception text.
@@ -98,7 +98,7 @@ def remote_locks(c):
         for n in c['nodes']:
             path=resolve_cache(n)['cache_path']+'/.recipe-control.lock'
             code="import os,fcntl,sys;f=os.open(sys.argv[1],os.O_CREAT|os.O_RDWR|os.O_NOFOLLOW,0o600);s=os.fstat(f);assert s.st_uid==os.getuid();fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB);print('LOCKED',flush=True);sys.stdin.read()"
-            proc=subprocess.Popen(['ssh','-o','BatchMode=yes','-o','ConnectTimeout=10',n['ssh_host'],
+            proc=subprocess.Popen(['ssh','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o','ConnectTimeout=10',n['ssh_host'],
                   shlex.join(['python3','-u','-c',code,path])],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,text=True)
             holders.append(proc)
             if not select.select([proc.stdout],[],[],20)[0] or proc.stdout.readline().strip()!='LOCKED':
@@ -239,6 +239,9 @@ def start(c,state_path,lock_check=None):
                         contents.append((image['Config'],layers,image['Os'],image['Architecture'],image.get('Variant','')))
                     if contents[0]!=contents[1]:raise ValueError('both ranks require identical image config, layers and platform')
                 state['runtime_parity']={'identical_image_ids':images[0]==images[1],'identical_image_content':True}
+                # Persist ownership before create can succeed remotely but lose its reply.
+                # A detached controller needs this nonce to reconcile an untracked name.
+                save()
                 for rank in [1,0]:
                     check()
                     n=c['nodes'][rank]
@@ -254,18 +257,7 @@ def start(c,state_path,lock_check=None):
                 for item in state['containers']:
                     check()
                     ssh(c['nodes'][item['rank']],['docker','start',item['id']])
-                end=time.monotonic()+c['startup_timeout_seconds']
-                while time.monotonic()<end:
-                    check()
-                    for item in state['containers']:
-                        n=c['nodes'][item['rank']];d=owned(n,item,state['owner']);probe=host_probe(n)
-                        if not d['State']['Running'] or d['State']['OOMKilled'] or probe['oom']!=initial[item['rank']]['oom'] or probe['available']<6*1024**3:
-                            raise RuntimeError('startup exit, OOM, or 6 GiB reserve guard tripped')
-                    url='http://127.0.0.1:'+str(c['api_port'])
-                    code="import urllib.request;urllib.request.urlopen("+repr(url+'/health')+",timeout=5).read()"
-                    if ssh(c['nodes'][0],['python3','-S','-c',code],timeout=15,check=False).returncode==0:break
-                    time.sleep(3)
-                else:raise TimeoutError('bounded startup deadline')
+                wait_ready(c,state,initial,check)
                 state['ready']=True;save();check()
             except BaseException as failure:
                 recover(failure)
@@ -274,6 +266,76 @@ def start(c,state_path,lock_check=None):
     except BaseException as failure:
         if not recovered:recover(failure)
         raise
+
+
+def wait_ready(c,state,initial,check):
+    end=time.monotonic()+c['startup_timeout_seconds']
+    while time.monotonic()<end:
+        check()
+        for item in state['containers']:
+            n=c['nodes'][item['rank']];d=owned(n,item,state['owner']);probe=host_probe(n)
+            if not d['State']['Running'] or d['State']['OOMKilled'] or probe['oom']!=initial[item['rank']]['oom'] or probe['available']<6*1024**3:
+                raise RuntimeError('startup exit, OOM, or 6 GiB reserve guard tripped')
+        url='http://127.0.0.1:'+str(c['api_port'])
+        code="import urllib.request;urllib.request.urlopen("+repr(url+'/health')+",timeout=5).read()"
+        if ssh(c['nodes'][0],['python3','-S','-c',code],timeout=15,check=False).returncode==0:return
+        time.sleep(3)
+    raise TimeoutError('bounded startup deadline')
+
+
+def restart_owned(c,state_path):
+    # Same containers, same recorded ownership and launch argv; never recreate by name.
+    from bootstrap_node import save_marker
+    state=load_json(state_path)
+    if state.get('configuration_sha256')!=hashlib.sha256(json.dumps(c,sort_keys=True).encode()).hexdigest():
+        raise ValueError('configuration changed since launch')
+    if len(state.get('containers',[]))!=2 or {i['rank'] for i in state['containers']}!={0,1}:
+        raise ValueError('partial deployment; explicit recovery required')
+    started=[];recovered=False
+    try:
+        with remote_locks(c) as check:
+            initial={}
+            for item in state['containers']:
+                check();n=c['nodes'][item['rank']]
+                d=owned(n,item,state['owner'])
+                resolved=resolve_mounts(n)
+                mounts={m['Destination']:(m['Source'],m['RW'],m['Type']) for m in d.get('Mounts',[])}
+                if (d['State']['Running'] or d['State']['OOMKilled'] or d['Image']!=item['image']
+                    or d['Config']['Cmd']!=serve_argv(c,item['rank'])
+                    or mounts.get('/model')!=(resolved['model_path'],False,'bind')
+                    or mounts.get('/cache/huggingface')!=(resolved['cache_path'],True,'bind')):
+                    raise ValueError('restart requires unchanged, stopped, non-OOM owned containers')
+                initial[item['rank']]=host_probe(n)
+                if initial[item['rank']]['available']<6*1024**3:raise ValueError('less than 6 GiB available')
+                if ssh(n,['nvidia-smi','--query-compute-apps=pid','--format=csv,noheader']).stdout.strip():
+                    raise ValueError('active GPU workloads; refusing restart')
+            try:
+                state['ready']=False;save_marker(state_path,state)
+                for item in sorted(state['containers'],key=lambda i:-i['rank']):
+                    check();n=c['nodes'][item['rank']]
+                    if owned(n,item,state['owner'])['State']['Running']:
+                        raise ValueError('container changed during restart')
+                    started.append(item)
+                    ssh(n,['docker','start',item['id']])
+                wait_ready(c,state,initial,check)
+                state['ready']=True;save_marker(state_path,state);check()
+            except BaseException as failure:
+                recovered=True
+                try:stop_owned(c,dict(state,containers=started))
+                except BaseException as cleanup:failure.add_note('restart cleanup failed: '+type(cleanup).__name__)
+                state['ready']=False
+                try:save_marker(state_path,state)
+                except BaseException as persistence:failure.add_note('restart state persistence failed: '+type(persistence).__name__)
+                raise
+    except BaseException as failure:
+        if started and not recovered:
+            try:stop_owned(c,dict(state,containers=started))
+            except BaseException as cleanup:failure.add_note('restart cleanup failed: '+type(cleanup).__name__)
+            state['ready']=False
+            try:save_marker(state_path,state)
+            except BaseException as persistence:failure.add_note('restart state persistence failed: '+type(persistence).__name__)
+        raise
+    print('Owned stopped containers restarted and healthy; no downloads or payload scans.')
 
 
 def on_termination(signum,frame):

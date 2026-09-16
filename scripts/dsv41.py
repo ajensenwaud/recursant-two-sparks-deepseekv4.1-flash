@@ -12,9 +12,13 @@ def release(path, *, model_only=False):
         if r.get('status')!='published' and (not isinstance(r.get('model'),dict) or r['model'].get('status')!='published'):
             raise ValueError('Exact model artifact is not published')
     elif r.get('status')!='published':
-        raise ValueError('Release not published: image digest and exact model revision are unavailable. Use advanced local build instructions only; no substitute is selected.')
-    if not model_only and not re.fullmatch(r'[a-z0-9][a-z0-9.-]+/[a-z0-9][a-z0-9._/-]*@sha256:[a-f0-9]{64}',r.get('image') or ''):
-        raise ValueError('registry image must be immutable sha256 reference')
+        raise ValueError('Release not published: verified runtime distribution metadata is still pending. The independently published model may be downloaded with download-model. No image is guessed, built or substituted.')
+    if not model_only:
+        if 'image_archive' in r:
+            from bootstrap_node import validate_archive
+            validate_archive(r)
+        elif not re.fullmatch(r'[a-z0-9][a-z0-9.-]+/[a-z0-9][a-z0-9._/-]*@sha256:[a-f0-9]{64}',r.get('image') or ''):
+            raise ValueError('registry image must be immutable sha256 reference')
     digest=hashlib.sha256((ROOT/'runtime/source-manifest.json').read_bytes()).hexdigest()
     if r.get('source_manifest_sha256')!=digest:
         raise ValueError('release source fingerprint does not match this checkout')
@@ -36,6 +40,11 @@ def release(path, *, model_only=False):
     return r
 
 def pull(c,r):
+    if 'image_archive' in r:
+        from bootstrap import remote_node
+        for n in c['nodes']:
+            remote_node(n,'image',{'node':n,'release':r})
+        return
     for n in c['nodes']:
         cluster.ssh(n,['docker','pull','--platform=linux/arm64',r['image']],timeout=3600)
         image=json.loads(cluster.ssh(n,['docker','image','inspect',r['image']]).stdout)[0]

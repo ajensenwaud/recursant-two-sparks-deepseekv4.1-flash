@@ -85,10 +85,11 @@ class FrontendTests(unittest.TestCase):
   import dsv41
   with tempfile.TemporaryDirectory() as td, mock.patch('dsv41.subprocess.run') as run, mock.patch('dsv41.cluster.ssh') as ssh:
    cfg=pathlib.Path(td)/'cluster.json'
-   dsv41.main(['configure','--config',str(cfg)])
+   release=pathlib.Path(td)/'unpublished.json';release.write_text(json.dumps({'status':'unpublished','image':None}))
+   dsv41.main(['configure','--config',str(cfg),'--release',str(release)])
    self.assertEqual(json.loads(cfg.read_text())['image'],'UNPUBLISHED')
-   with self.assertRaises(FileExistsError):dsv41.main(['configure','--config',str(cfg)])
-   with self.assertRaisesRegex(ValueError,'not published'):dsv41.main(['start','--config',str(cfg)])
+   with self.assertRaises(FileExistsError):dsv41.main(['configure','--config',str(cfg),'--release',str(release)])
+   with self.assertRaisesRegex(ValueError,'not published'):dsv41.main(['start','--config',str(cfg),'--release',str(release)])
    run.assert_not_called();ssh.assert_not_called()
 
  def test_cluster_accepts_digest_and_refuses_injection(self):
@@ -102,9 +103,10 @@ class FrontendTests(unittest.TestCase):
 
  def test_unpublished_release_fails_before_network(self):
   import dsv41
-  with mock.patch('dsv41.cluster.ssh') as ssh:
+  with tempfile.TemporaryDirectory() as td,mock.patch('dsv41.cluster.ssh') as ssh:
+   release=pathlib.Path(td)/'unpublished.json';release.write_text(json.dumps({'status':'unpublished','image':None}))
    with self.assertRaisesRegex(ValueError,'not published'):
-    dsv41.release(ROOT/'configs/release.json')
+    dsv41.release(release)
    ssh.assert_not_called()
 
  def test_release_rejects_mutable_or_mismatched_pins(self):

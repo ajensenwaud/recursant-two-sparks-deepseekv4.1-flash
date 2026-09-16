@@ -12,6 +12,12 @@ jobs:
           persist-credentials: false
       - name: Python standard-library tests (no GPU, installs or model download)
         run: python3 -B -m unittest discover -s tests -v
+      - name: Entry-point syntax and side-effect-free help
+        run: |
+          bash -n start.sh stop.sh status.sh
+          ./start.sh --help
+          ./stop.sh --help
+          ./status.sh --help
       - name: Check pinned build and download plans
         run: |
           python3 -B scripts/build.py --dry-run

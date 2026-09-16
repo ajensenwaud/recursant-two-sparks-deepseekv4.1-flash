@@ -8,8 +8,8 @@
     },
     {
       "path": ".github/workflows/cpu.yml",
-      "bytes": 687,
-      "sha256": "7e2ebd6e72d2c0a52573becb3bde780d2e07df341123f313a6849fd79ba8d4a8"
+      "bytes": 890,
+      "sha256": "7ecaed993d556f475eb94391d2b99ec4bbe72026b8ff06195631e39afcce05ff"
     },
     {
       "path": ".gitignore",
@@ -18,18 +18,18 @@
     },
     {
       "path": "LICENSE",
-      "bytes": 574,
-      "sha256": "9a6af0c1c00d40c49b2a4b095ed63c2a9e5765e709f74767735bfeb991d58d8c"
+      "bytes": 31719,
+      "sha256": "cf0b6664ce73f379c829d162e2c738dcd867448fbc2ee3962ef2b000297a6083"
     },
     {
       "path": "NOTICE",
-      "bytes": 3471,
-      "sha256": "0863706025f5ee720d5bd6e48736b9fc62aa7c765b2aac5d1dadefb2629c6e69"
+      "bytes": 3795,
+      "sha256": "c9ccbbfbfbec1ae808f82c61d6f004f6025e98bb1879ef35bfd4260da445f2c4"
     },
     {
       "path": "README.md",
-      "bytes": 12227,
-      "sha256": "4c60c4ee5a43aa6685ee9747f2947554dcd86e352f3eb7a07def8e2f08f487f0"
+      "bytes": 11450,
+      "sha256": "7dd13e6e299cb768474dbfb70d64848dac7618c50ef7a8835c960fac5b78b526"
     },
     {
       "path": "configs/cluster.example.json",
@@ -38,8 +38,8 @@
     },
     {
       "path": "configs/release.json",
-      "bytes": 10113,
-      "sha256": "e7d21946344853077bb4ba42f6f42c06ba6ff28f61ce6da9b6781b72bf27e592"
+      "bytes": 19730,
+      "sha256": "c884eaf5f5739481262d6950e3ae3e6705d7aecbc38d08d711f7c1041636a21d"
     },
     {
       "path": "configs/source-model.json",
@@ -202,6 +202,16 @@
       "sha256": "582e6a649cb1df6220badfc44c42ff536f65db10c21d731ad9efd682dad78de9"
     },
     {
+      "path": "scripts/bootstrap.py",
+      "bytes": 7924,
+      "sha256": "486428425f6807803aee42347ccba0a4b0947891119b478fe2f30a8fcd22e906"
+    },
+    {
+      "path": "scripts/bootstrap_node.py",
+      "bytes": 11670,
+      "sha256": "1295a9b926ee90f2182c4f6c6756193fba885671da54db9719432968ade286ed"
+    },
+    {
       "path": "scripts/build.py",
       "bytes": 2927,
       "sha256": "9367799f4ef3ec189d5a28af051c76c28d01bff39ca872c5dd36f009728e5e74"
@@ -213,8 +223,8 @@
     },
     {
       "path": "scripts/cluster.py",
-      "bytes": 19731,
-      "sha256": "f98efb5f143be26fa26e33e2dde295d326183493dd6ed59deef72ac848a4ff8f"
+      "bytes": 23325,
+      "sha256": "2543155824590c5f55b29259401bc380ea0c58aa0a624bcfe5141338d072b5e3"
     },
     {
       "path": "scripts/download.py",
@@ -223,8 +233,8 @@
     },
     {
       "path": "scripts/dsv41.py",
-      "bytes": 8193,
-      "sha256": "722ee5e4461c5c813f8248fc93377fb69e2260e392247313b45194a4fc6e7f9b"
+      "bytes": 8548,
+      "sha256": "a57e5437995cdfcd683740a89e98ba544c531b4307d5672e1d84400379d9f215"
     },
     {
       "path": "scripts/prepare.py",
@@ -242,14 +252,34 @@
       "sha256": "7b8b47e833742db921eee633680fe5b63aad1ab91b62fe82cc805bf008a713ae"
     },
     {
+      "path": "start.sh",
+      "bytes": 288,
+      "sha256": "f601cd5c9270b2113e4cc155bc6d7c6debc862648a98291683158f3975e47093"
+    },
+    {
+      "path": "status.sh",
+      "bytes": 291,
+      "sha256": "12139df23c3db6e460c2238a60e01e4b3d00fc5efe056b58952fb78eb3f68bbc"
+    },
+    {
+      "path": "stop.sh",
+      "bytes": 289,
+      "sha256": "df0715c6f833f4d3b3eb7afadeafbe95ae0bc86b5474a3b33c1e7f86fe0b3985"
+    },
+    {
+      "path": "tests/test_bootstrap.py",
+      "bytes": 23256,
+      "sha256": "9b25e34985f35688cb41a66ecb4c23b18e2ab6fb86fba4095d274524a1be1272"
+    },
+    {
       "path": "tests/test_existing_bind.py",
       "bytes": 1557,
       "sha256": "241b6cecbf11e34e34cf8d34666b54f4e24bd6b10f497892d23947da96bc731d"
     },
     {
       "path": "tests/test_frontend.py",
-      "bytes": 7447,
-      "sha256": "b2c77b56d45999c8b8679910992d212e4aadd77e2c1c0248cd72d76c4d47795f"
+      "bytes": 7772,
+      "sha256": "f9de59d7ede0980bcfe6eb912a5d5e2571b8f84e0744064292fb4fc1d63cad74"
     },
     {
       "path": "tests/test_local_prebuilt.py",
@@ -263,8 +293,8 @@
     },
     {
       "path": "tests/test_publication.py",
-      "bytes": 29992,
-      "sha256": "8e2c9d505b4c68375e8ea859b059547a55c7b240c69c3228748c36ddaa204117"
+      "bytes": 34693,
+      "sha256": "258ec3af432497704d98e52f2d74685e2aa71a7a32ec181d9c332c14ca1957d3"
     },
     {
       "path": "tests/test_recipe.py",

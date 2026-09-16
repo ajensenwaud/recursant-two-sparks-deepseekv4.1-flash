@@ -1,102 +1,90 @@
-# DeepSeek V4.1 vision on two GB10 systems
+# DeepSeek V4.1 vision on two Sparks
 
-Prebuilt-first deployment of the retained **EXL3 MCG 2-bit / native decode / DSpark K5 / vision-enabled** configuration on two 128 GB ARM64 GB10 nodes.
+Run the retained **EXL3 MCG 2-bit / native decode / DSpark K5 / vision-enabled** configuration on two 128 GB ARM64 GB10 systems.
 
-**Source public; local GPU deployment verified; model available; registry container image pending.** The [exact retained model](https://huggingface.co/ajensenwaud/recursant-two-sparks-deepseekv4.1-flash/tree/d032e578f9ed3724e24239a79d408772620b1d9d) is pinned in `configs/release.json` at revision `d032e578f9ed3724e24239a79d408772620b1d9d`. Anonymous Hub readback verified all 53 retained files and sizes, including server LFS SHA256 for all 48 shards; bounded downloads verified the five retained metadata files by SHA256. No full model download was repeated. Overall release status remains unpublished and the image remains null: registry deployment stays gated. Cloning/importing does nothing to the system. Local validation is not broad quality certification.
+**Source, exact model and prebuilt ARM64 runtime are public and pinned. Public clone-to-GPU acceptance is still pending.** The installer downloads verified artifacts without selecting a substitute model, compiling a runtime or converting weights. The existing local two-GPU deployment has passed text, reasoning and two-image smokes; that is not yet a clean public-download installation result.
 
-## Normal installation: configure → obtain → start → verify
+## Install
 
-Once an independently validated release has real immutable pins:
+On the head node or a Linux coordinator with SSH access to **both** nodes:
 
 ```bash
-python3 -B scripts/dsv41.py configure
-# Edit configs/cluster.local.json: both SSH hosts, fabric IPs,
-# interfaces, HCAs, model paths and dedicated cache paths.
-python3 -B scripts/dsv41.py pull
-# On EACH node, using the same release checkout:
-python3 -B scripts/dsv41.py download-model --destination /srv/models/dsv41-exl3-mcg2
-# On the coordinator:
-python3 -B scripts/dsv41.py plan
-python3 -B scripts/dsv41.py start
-python3 -B scripts/dsv41.py status
+git clone https://github.com/ajensenwaud/recursant-two-sparks-deepseekv4.1-flash.git
+cd recursant-two-sparks-deepseekv4.1-flash
+./start.sh
+```
+
+The first run asks for a deployment name and, for each node:
+
+- Existing SSH host alias or `user@host` (including the head, even when running there).
+- Fabric IPv4 address, network interface and RDMA HCA. These are separate settings; the installer does not guess them.
+- Absolute model directory and a separate, dedicated writable cache directory, with no symlink aliases or overlapping paths.
+
+It saves `configs/cluster.local.json`, checks both nodes before installing, downloads the pinned runtime and model **directly on each node**, verifies them once, then starts worker and head through the coordinated launcher. The model is mounted read-only. Nothing is compiled or converted by this installer, and no host packages, drivers, credentials, firewall rules or kernel modules are installed or changed.
+
+The first model download is **358,128,021,424 bytes per node** and may take hours. Keep the coordinator connected. Interrupted files resume when you rerun the same command. Each file is SHA256-checked before finalization; the complete model structure is checked before an installation receipt is written to the cache. Existing model files are checked without creating lock/receipt files in the model directory. Disk checks include missing model bytes, runtime archive/storage requirements and a 10 GiB reserve; the image-load budget is conservative. The runtime archive, if used, remains in the cache for recovery.
+
+Normal `./start.sh` calls do **not** rehash or scan weights. A healthy owned deployment is left untouched after ownership and health checks. After `./stop.sh`, the same owned containers can restart without downloads or payload scans. Partial, changed, OOM-failed or foreign-owned deployments fail closed; unrelated GPU work and existing container names are never stopped, removed or replaced. Keep the ignored `.state/` directory: it records the exact container IDs and ownership needed for recovery. Do not edit model files after installation; installation receipts are not a continuous tamper monitor.
+
+### Prerequisites
+
+- Python **3.11+** and OpenSSH on the coordinator; Python 3.11+, Linux ARM64, Docker access without sudo, compatible NVIDIA drivers, NVIDIA Container Toolkit, `nvidia-smi` and `ip` on both Sparks.
+- Working RDMA devices/fabric and SSH public-key access. Verify each server's host key yourself first. The recipe enforces `StrictHostKeyChecking=yes` and batch authentication; it never accepts unknown keys or collects credentials.
+- Local NVMe space on both nodes for the exact model plus the image and cache. Dedicated model/cache directories must be writable for a fresh download; a complete existing model may be read-only. GPU workloads must be idle for first launch or restart.
+- Trusted nodes and fabric. The retained configuration uses host networking/IPC, RDMA access, unlimited memlock, `IPC_LOCK` and a SELinux label override.
+
+If a prerequisite is missing, the installer reports it and exits. Install/configure it yourself and rerun; no sudo fallback is attempted.
+
+### Configuration and access
+
+```bash
+./start.sh --configure-only                   # interactive, save without SSH/install
+./start.sh --config /path/to/cluster.json     # unattended using an existing configuration
+./status.sh
+./stop.sh
 python3 -B scripts/dsv41.py logs
-python3 -B scripts/dsv41.py verify
-python3 -B scripts/dsv41.py stop
+python3 -B scripts/dsv41.py verify            # explicit text/reasoning/two-PNG requests
 ```
 
-Today `configure` writes `UNPUBLISHED`; obtaining/starting through the registry-release path fails with an actionable explanation. Do not change the release status or manufacture pins to bypass this gate. After image publication, regenerate configuration or update its image to the exact published digest. `--config` and `--release` accept explicit files. There is **no implicit source build or conversion**. Pull verifies ARM64/Linux, the requested digest and retained-source fingerprint on both nodes. Model retrieval uses one exact revision and SHA256 allowlist, resumes interrupted files and validates model structure. Run it on each node; it does not download through the coordinator.
+`--config` also applies to stop/status and the Python frontend. Configuration is validated before network access. Noninteractive first runs without a config fail with instructions, rather than guessing. Help and cloning have no deployment side effects. `--release PATH` selects a reviewed release metadata file, not an unpinned URL.
 
-Model publication is independent of image publication. Verified release metadata
-now records `model.status: "published"`, its immutable repository/revision and
-53-file SHA256 allowlist, plus the matching `source_manifest_sha256`, while
-leaving overall `status: "unpublished"` and `image: null`.
+API access defaults to **head-node `127.0.0.1:8000`**. Use your own SSH tunnel or authenticated TLS proxy for remote clients. Only to preserve an **already approved** LAN endpoint, first configure with `./start.sh --configure-only --preserve-existing-public-bind`; this narrowly records `0.0.0.0:8000`. No exposure is enabled silently and no firewall is changed. Never put credentials in configuration, Git, build arguments or logs. `RECIPE_API_KEY` is an optional client-only variable. API clients reject redirects; logs may contain user requests and must not be published.
 
-The model-only download is available now, without cluster configuration, SSH or
-a published image (358,128,021,424 bytes; run separately on each node):
+## Pinned artifacts
+
+The [exact retained model](https://huggingface.co/ajensenwaud/recursant-two-sparks-deepseekv4.1-flash/tree/d032e578f9ed3724e24239a79d408772620b1d9d) is pinned at revision `d032e578f9ed3724e24239a79d408772620b1d9d`: 53 retained files, including 48 shards and metadata, with exact sizes/SHA256 in `configs/release.json`. Anonymous Hub readback verified the full inventory and shard LFS hashes; bounded downloads verified all five retained metadata files. The entire model download was not repeated for that publication check.
+
+Model publication is independent of image publication. You can download the model now on either node without cluster configuration:
 
 ```bash
 python3 -B scripts/dsv41.py download-model --destination /srv/models/dsv41-exl3-mcg2
 ```
 
-The production downloader was exercised on the five real pinned metadata files;
-all sizes and SHA256 hashes matched. The full 358 GB download and subsequent
-whole-model structural validation were not repeated during release integration.
-Model-only publication does not authorize registry `pull`, `plan` or `start`;
-the explicit local-prebuilt path remains separate.
+The complete release supports a registry image pinned by manifest digest, or a Docker archive pinned by immutable Hub revision, byte count and SHA256. Archive installation verifies the loaded ARM64/Linux image's complete Config, ordered RootFS layer digests and retained-source label. Docker storage backends can report different image IDs for identical content; launch pins the inspected immutable ID on each node. A local image-config ID is never presented as a registry digest. Model/image publication status and actual fresh-install verification are distinct claims.
 
-Start retains coordinated locks, ownership checks, strict remote mount validation, image-content checks, bounded startup, a 6 GiB available-memory reserve and no-new-host-OOM guard. It refuses occupied GPUs or existing names, creates worker before head, and waits for readiness. Run explicit verify for text/reasoning/two-PNG verification. Failure stops only newly owned IDs while locks remain held. Stop still works if the model directory has disappeared; it does not require published release metadata. Stopped containers/state remain for inspection: no automatic replacement or deletion.
+The release is `published`: the [runtime archive and source/notices companion](https://huggingface.co/ajensenwaud/recursant-two-sparks-deepseekv4.1-flash-runtime/tree/e1cd8203d398cde316bf98a7ac50a043adc869e2) are pinned at `e1cd8203d398cde316bf98a7ac50a043adc869e2`. The Docker archive is 10,695,250,306 bytes with SHA256 `38402f4e4d1033eff2f7f2883afca292566fe2222edb91670d8c9e8d43bccf08`. Anonymous immutable readback verified publication; actual public-download/load/start acceptance is still pending. Runtime source fingerprints are unchanged by installer-only edits.
 
-## Local prebuilt installation (available without a published release)
+## Retained serving controls
 
-Use a locally built ARM64 image's full `sha256:...` Docker image ID or an explicit
-local tag, already installed on both nodes. Transfer only that clean image with
-`docker save IMAGE_TAG | ssh OTHER_NODE docker load`. Docker storage backends may
-report different IDs for the same saved/loaded image; in that case give both local
-images the same tag. Never export or commit a running container.
+TP2; native MCG decode with ExLlama fallback; dense MXFP8 with the retained narrow FlashInfer autotuner; original BF16 output head; K5 probabilistic drafting with ordinary target verification; vision enabled; HIGH thinking; 1,048,576 configured context; eight slots; 4 GiB KV per rank; 2,048 batched tokens.
+
+Startup retains coordinated locks, exact ownership/configuration and mount checks, image-content parity, bounded readiness, a 6 GiB available-memory reserve and no-new-host-OOM guard. On failure it stops only the exact newly started owned IDs. These startup guards are not a continuous watchdog or an OOM-proof guarantee. Full 1M occupancy, broad quality and every host configuration are not certified. Explicit `verify` sends the smoke requests; ordinary start does not benchmark or send generation requests.
+
+## Advanced local prebuilt use and reproduction
+
+These paths are not needed for the normal installer. To use a clean image already installed on both nodes and an existing retained model:
 
 ```bash
 python3 -B scripts/dsv41.py configure --local-image dsv41-vision:local-prebuilt
-# Edit configs/cluster.local.json with the existing exact retained model_path
-# on each node, and distinct dedicated cache_path directories.
+# Advanced path only: edit the generated local config for your existing nodes/paths.
 python3 -B scripts/dsv41.py plan
 python3 -B scripts/dsv41.py start
 python3 -B scripts/dsv41.py verify
 ```
 
-`--local-image` is only for configure; subsequent commands use the saved config.
-It records `local_prebuilt: true`; plan/start need no published release metadata.
-It does not invent a registry release, pull an image, download/convert a model,
-or certify GPU behavior. `pull` rejects local prebuilt images. The optional
-`local_prebuilt` field must be a boolean; existing configurations, including
-legacy SHA-ID local configurations, remain supported. Other fields are deployment, image, api_bind, api_port, master_port,
-startup_timeout_seconds, and two nodes, each with ssh_host, fabric_ip,
-socket_interface, rdma_hca, model_path, cache_path. Use absolute model/cache paths.
+Explicit local-prebuilt mode is separate from a published release and does not pull or convert anything. Transfer only a clean image with `docker save IMAGE_TAG | ssh OTHER_NODE docker load`; never export or commit a running container. Existing locally approved public binds require the explicit configure flag described above.
 
-Installation/build validates imports and source overlays once. Normal start does
-not rehash model payloads, disassemble vendor libraries, run import probes, or
-send inference requests. It accepts identical image IDs, or (for differing IDs)
-requires identical inspected Config, nonempty RootFS layer digests and platform
-(OS, architecture and variant). Missing content metadata fails closed. This uses
-only the existing image inspections, not extra remote checks. Each container is
-created with its own node's inspected immutable ID, never the mutable tag, retaining ownership,
-mount, lock, available-memory/OOM and readiness guards. Explicit `verify` sends
-the four text, reasoning, red-square-CAT and blue-circle-DOG smoke requests.
-Existing retained pack hashes are one-time provenance evidence, not a launch hook.
-
-## Requirements and retained controls
-
-- Existing Linux ARM64, compatible NVIDIA driver, Docker/NVIDIA Container Toolkit, Python 3.11+, host-key-verified SSH and working RDMA on both nodes. No host installation, firewall changes, sudo cache drops or credential setup is automated.
-- Local NVMe holding the **same exact** 48-shard, 188,245-tensor pack on each node: 358,107,269,776 shard bytes, plus metadata and runtime/cache space. No weights are bundled. A similarly named public quantization is not a substitute.
-- Dedicated trusted nodes and fabric; initial validation requires exclusive GPUs. Host networking/IPC, RDMA device access, unlimited memlock, IPC_LOCK and the retained SELinux-label override remain necessary parts of this recipe.
-- TP2; native MCG decode with ExLlama fallback; dense MXFP8 with the retained narrow FlashInfer autotuner; original BF16 head; K5 probabilistic drafting and ordinary target verification; vision enabled; HIGH thinking; 1,048,576 configured context, eight slots, 4 GiB KV/rank, 2,048 batched tokens.
-
-The local GPU deployment exercised read-only model mounts, offline Hub and no remote-code trust/profiler flags, while explicitly preserving an already approved public bind; that does not validate every new host or default-loopback deployment. The startup reserve is not a continuous watchdog or an OOM-proof guarantee. Full 1M occupancy and broad vision quality are not certified. Measured throughput is bounded workload evidence, not a hardware guarantee.
-
-API access is head-node loopback; use a user-managed SSH tunnel or explicitly authenticated TLS proxy for remote clients. `RECIPE_API_KEY` is an optional client-only environment variable. Never put credentials in configuration, Git, build arguments or logs. API clients reject redirects. Logs can contain user requests: do not publish them.
-
-## Advanced: local build, conversion and measurement
-
-These are reproduction tools, **not the default install**:
+CPU checks and advanced dry-runs:
 
 ```bash
 python3 -B -m unittest discover -s tests -v
@@ -105,35 +93,16 @@ python3 -B scripts/download.py --dry-run
 python3 -B scripts/prepare.py --source /source --destination /output --dry-run
 ```
 
-`runtime/Dockerfile` pins the public base digest and plugin/ExLlama commits. It retains modified source, licenses and built wheel hashes. The compiler uses two jobs; this alone is not a memory limit. Use a resource-enforcing builder on an approved machine, verify its actual cgroups, and do not run an uncapped build alongside serving. `scripts/build.py --execute --acknowledge-build-gaps --tag dsv41-vision:local-review` explicitly builds but does not enforce host-memory limits or start the model. Local validation used a separate sterile context and checked 8 GiB/2-CPU cgroups before dependency installation; build success and GPU validation must be reported separately.
+`runtime/Dockerfile` pins the public base digest and plugin/ExLlama commits, retains modified source and licenses, and records wheel hashes. `scripts/build.py --execute --acknowledge-build-gaps --tag dsv41-vision:local-review` explicitly builds; compiler parallelism of two does not itself enforce a memory limit. Use a resource-enforcing builder under approved scope, never an uncapped build alongside serving.
 
-`download.py --destination /srv/models/dsv41-source` retrieves pinned official **source** assets, not the retained converted pack. `prepare.py --execute --acknowledge-unvalidated-conversion` requires the built GPU container with read-only source and separate writable output mounts. Budget source (~510 GB) + complete output + at least 40 GiB reserve, as well as image/cache storage. It uses 2-bit MCG, one worker, batch 1, greedy beam 16; draft/non-routed tensors are preserved and receipts checked. A new conversion is not byte-equivalent or quality-certified merely because structure passes. No automatic deletion or source replacement occurs.
+`download.py` obtains the official source checkpoint, not the retained pack. `prepare.py --execute --acknowledge-unvalidated-conversion` requires a GPU runtime and separate read-only source/writable output mounts. Budget source (~510 GB), full output, at least 40 GiB reserve and image/cache storage. Conversion uses 2-bit MCG, one worker, batch one and greedy beam 16, preserving draft/non-routed tensors. A new conversion is not byte-equivalent or quality-certified by structure alone. No source deletion/replacement is automatic. `check_model.py --model PATH --checksums` checks conversion receipts when available; `benchmark.py --help` documents explicit usage-based measurements.
 
-Advanced local builds use `scripts/cluster.py configure|plan|start|status|stop`; start requires `--execute --acknowledge-unreleased`. The same frontend supports local prebuilt IDs and tags as documented above. Both paths share the same safety implementation. Do not use an occupied production pair. `scripts/check_model.py --model PATH --checksums` validates conversion receipts when available; header checks alone are not full-payload checks. `scripts/benchmark.py --help` documents explicit single-stream usage-based measurement, not a quality test.
+## License and release evidence
 
-## Release gates
+Original integration code is **AGPL-3.0-only**; see `LICENSE` and `NOTICE`. Upstream licenses/notices, including Mia's AI Lab and the AGPL plugin attribution, are preserved. Model weights remain under their separate MIT terms. This choice does not waive corresponding-source or CUDA/base redistribution obligations.
 
-The original integration license is **not selected**. Preserve `LICENSE`, `NOTICE` and all component notices, including Mia's AI Lab and AGPL plugin attribution. Owner license choice does not waive corresponding-source or CUDA/base redistribution obligations. The public base digest resolves, but its metadata says build commit `unknown`; installed vLLM identifies `179dd0fa9` and a local build-wheel path, not obtainable full corresponding source. Source provenance remains unresolved.
+The public base digest resolves, but its metadata reports build commit `unknown`; installed vLLM identifies `179dd0fa9` and a local wheel path rather than obtainable full corresponding source. That provenance limitation remains disclosed. APT artifact snapshots are also a source-rebuild limitation; neither is disguised as a fabricated checksum or a successful rebuild.
 
-Completed local evidence: a clean ARM64 image build and 64 in-image CPU tests;
-later frontend suites discovered 67 tests (66 passed, one skipped because Torch
-was absent locally). The actual local-prebuilt configure → plan → start → verify
-path ran on both GPUs, with text, reasoning and two PNG smokes passing before and
-after five measured concurrency cells (1, 2, 3, 4 and 8). Those were 60-second
-sustained windows with 8,192-token prompts and substantial prefix-cache reuse;
-they do not certify full-context occupancy, general answer quality or every
-kernel path. These are separate historical observations, not claims that this
-frontend-only change rebuilt or reran the GPU deployment.
+Historical local evidence includes a clean ARM64 build, in-image CPU tests, and the local-prebuilt configure → plan → start → verify path on both GPUs. Text, reasoning and two PNG smokes passed before/after five measured concurrency cells (1, 2, 3, 4 and 8), using 60-second windows, 8,192-token prompts and substantial prefix-cache reuse. Those are bounded local measurements, not proof of a clean external download or general answer quality. CPU installer tests use synthetic artifacts and mocked Docker/SSH; they do not prove a real public image load or GPU startup.
 
-CPU tests and mocked registry/SSH fixtures do not establish real pulls or model
-publication. Remaining image-release gates include source/license clearance,
-distribution review and authenticated registry publication with anonymous
-digest readback. Model publication has separately passed immutable-revision,
-remote inventory and checksum verification, as described above.
-The unresolved original integration license is not a blocker to the separate
-MIT-licensed model upload. APT artifact snapshots remain a disclosed
-source-rebuild limitation, not a fabricated blocker to a separately validated
-prebuilt image. Further numerical/graph and broad quality claims require their
-own evidence.
-
-Private audits, host identities, research archives, credentials, model payloads and image archives are excluded from this tree.
+Private audits, host identities, research archives, credentials, model payloads and image archives are excluded from this repository.

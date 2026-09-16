@@ -127,11 +127,15 @@ class CompleteModelTests(unittest.TestCase):
             with self.assertRaises(ValueError):check_model.check_mcg(raw)
 
 class TransactionTests(unittest.TestCase):
-    def launch_fixture(self, fail_save=0, lock_check=None, parity=None, exit_lock=False, competitor=False, fail_start=False, enforce_locks=False, intervening_owner=False, image_metadata=None):
-        import cluster, hashlib, contextlib, io
+    def launch_fixture(self, fail_save=0, lock_check=None, parity=None, exit_lock=False, competitor=False, fail_start=False, enforce_locks=False, intervening_owner=False, image_metadata=None, fail_create=False, observed=None):
+        import cluster, hashlib, contextlib, io, stat
         c=json.loads((ROOT/'configs/cluster.example.json').read_text())
         digest=hashlib.sha256((ROOT/'runtime/source-manifest.json').read_bytes()).hexdigest()
         containers={}; calls=[]; writes=[]; held=False; violations=[]
+        synced=[];real_fsync=cluster.os.fsync;real_replace=cluster.os.replace
+        def sync(fd):
+            real_fsync(fd)
+            synced.append('directory' if stat.S_ISDIR(cluster.os.fstat(fd).st_mode) else 'file')
         def remote(n,args,**kwargs):
             calls.append(args)
             if enforce_locks and not held:violations.append(args)
@@ -144,9 +148,14 @@ class TransactionTests(unittest.TestCase):
                     extra=dict(image_metadata[rank]);image['Config'].update(extra.pop('Config',{}));image.update(extra)
                 output=json.dumps([image])
             elif args[:2]==['docker','create']:
+                if observed is not None:
+                    observed.setdefault('before_create',[]).append({
+                        'state':json.loads(state_path.read_text()) if state_path.exists() else None,
+                        'synced':list(synced)})
                 cid=str(rank+1)*64;owner=args[args.index('--label')+1].split('=',1)[1]
-                containers[cid]={'Id':cid,'Image':'sha256:'+str(rank if parity else 0)*64,'Config':{'Labels':{cluster.LABEL:owner},'Cmd':cluster.serve_argv(c,rank)},'State':{'Running':False,'OOMKilled':False},
+                containers[cid]={'Id':cid,'Name':'/'+args[args.index('--name')+1],'Image':'sha256:'+str(rank if parity else 0)*64,'Config':{'Labels':{cluster.LABEL:owner},'Cmd':cluster.serve_argv(c,rank)},'State':{'Running':False,'OOMKilled':False},
                   'Mounts':[{'Destination':'/model','Source':n['model_path'],'RW':False,'Type':'bind'},{'Destination':'/cache/huggingface','Source':n['cache_path'],'RW':True,'Type':'bind'}]};output=cid
+                if fail_create:raise subprocess.TimeoutExpired(args,60)
             elif args[:2]==['docker','start']:
                 containers[args[2]]['State']['Running']=True
                 if fail_start:raise RuntimeError('injected start failure')
@@ -163,6 +172,7 @@ class TransactionTests(unittest.TestCase):
         def failing_write(*args,**kwargs):
             writes.append(1)
             if len(writes)>=fail_save:raise OSError('injected state persistence failure')
+            return real_replace(*args,**kwargs)
         @contextlib.contextmanager
         def locks():
             nonlocal held
@@ -175,6 +185,8 @@ class TransactionTests(unittest.TestCase):
                     raise RuntimeError('lock lost on context exit')
             finally:held=False
         with tempfile.TemporaryDirectory() as td, contextlib.ExitStack() as stack:
+            state_path=pathlib.Path(td)/'state.json'
+            stack.enter_context(patch.object(cluster.os,'fsync',side_effect=sync))
             stack.enter_context(patch.object(cluster,'resolve_mounts',side_effect=lambda n:{k:n[k] for k in ['model_path','cache_path']}))
             stack.enter_context(patch.object(cluster,'ssh',side_effect=remote))
             stack.enter_context(patch.object(cluster,'remote_locks',side_effect=lambda c:locks()))
@@ -182,15 +194,70 @@ class TransactionTests(unittest.TestCase):
             stack.enter_context(patch.object(cluster,'inspect',side_effect=inspected))
             stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
             if fail_save:
-                stack.enter_context(patch.object(pathlib.Path,'write_text',side_effect=failing_write))
                 stack.enter_context(patch.object(cluster.os,'replace',side_effect=failing_write))
             error=None
             try:
-                if lock_check is None:cluster.start(c,pathlib.Path(td)/'state.json')
-                else:cluster.start(c,pathlib.Path(td)/'state.json',lock_check=lock_check)
+                if lock_check is None:cluster.start(c,state_path)
+                else:cluster.start(c,state_path,lock_check=lock_check)
             except BaseException as e:error=e
+            if observed is not None:
+                observed['state']=json.loads(state_path.read_text()) if state_path.exists() else None
         self.assertFalse(violations, 'remote operations outside healthy locks')
         return containers,calls,error
+
+    def test_first_create_timeout_retains_durable_owner_for_reconciliation(self):
+        import cluster,hashlib
+        observed={}
+        containers,calls,error=self.launch_fixture(fail_create=True,fail_save=2,observed=observed,enforce_locks=True)
+        self.assertIsInstance(error,subprocess.TimeoutExpired)
+        self.assertEqual(len(containers),1,'timeout must occur after the create side effect')
+        self.assertEqual(sum(a[:2]==['docker','create'] for a in calls),1)
+        self.assertFalse(any(a[:2] in [['docker','start'],['docker','stop'],['docker','rm'],['docker','rename']] for a in calls))
+        before=observed['before_create'][0]
+        self.assertIsNotNone(before['state'],'owner must be on disk before create, not first written by recovery')
+        self.assertEqual(before['synced'],['file','directory'])
+        self.assertEqual(observed['state'],before['state'],'failed recovery write must preserve initial ownership')
+        state=observed['state'];self.assertEqual(state['containers'],[])
+        self.assertFalse(state.get('ready'))
+        c=json.loads((ROOT/'configs/cluster.example.json').read_text())
+        self.assertEqual(state['configuration_sha256'],hashlib.sha256(json.dumps(c,sort_keys=True).encode()).hexdigest())
+        # The detached controller can discover the stopped candidate by name,
+        # then require its exact ID, recorded owner and immutable image.
+        cid,d=next(iter(containers.items()))
+        self.assertRegex(cid,r'^[a-f0-9]{64}$');self.assertEqual(d['Id'],cid)
+        self.assertEqual(d['Name'],'/'+c['deployment']+'-rank1')
+        self.assertTrue(state['owner']);self.assertEqual(d['Config']['Labels'][cluster.LABEL],state['owner'])
+        self.assertEqual(d['Image'],'sha256:'+'0'*64)
+        self.assertFalse(d['State']['Running'])
+        self.assertTrue(any('recovery state persistence failed' in note for note in error.__notes__))
+        with tempfile.TemporaryDirectory() as td,patch.object(cluster,'ssh') as remote:
+            path=pathlib.Path(td)/'state.json';path.write_text(json.dumps(state))
+            with self.assertRaisesRegex(ValueError,'deployment state exists'):cluster.start(c,path)
+            with self.assertRaisesRegex(ValueError,'partial deployment'):cluster.restart_owned(c,path)
+            remote.assert_not_called()
+
+    def test_initial_state_write_failure_prevents_create(self):
+        observed={}
+        containers,calls,error=self.launch_fixture(fail_save=1,observed=observed,enforce_locks=True)
+        self.assertIsInstance(error,OSError)
+        self.assertEqual(containers,{})
+        self.assertFalse(any(a[:2]==['docker','create'] for a in calls))
+        self.assertIsNone(observed['state'])
+        self.assertTrue(any('recovery state persistence failed' in note for note in error.__notes__))
+
+    def test_owner_is_durably_recorded_before_remote_create(self):
+        import cluster
+        observed={}
+        containers,calls,error=self.launch_fixture(observed=observed,enforce_locks=True)
+        self.assertIsNone(error)
+        self.assertEqual(len(observed['before_create']),2)
+        for index,before in enumerate(observed['before_create']):
+            self.assertIsNotNone(before['state'],'create reached before ownership persistence')
+            self.assertEqual(len(before['state']['containers']),index)
+            self.assertEqual(before['synced'],['file','directory']*(index+1))
+            self.assertEqual(before['state']['owner'],observed['state']['owner'])
+        self.assertTrue(observed['state']['ready'])
+        self.assertTrue(all(d['Config']['Labels'][cluster.LABEL]==observed['state']['owner'] for d in containers.values()))
 
     def test_equivalent_content_with_backend_specific_ids_pins_each_rank(self):
         metadata={'RootFS':{'Type':'layers','Layers':['sha256:'+'a'*64]},'Os':'linux','Architecture':'arm64','Config':{'Cmd':['serve']}}
@@ -227,7 +294,7 @@ class TransactionTests(unittest.TestCase):
         self.assertFalse(containers)
 
     def test_healthy_locks_cover_preflights_and_rollback(self):
-        for options in [dict(fail_start=True),dict(fail_save=1),dict(fail_save=2),dict(fail_save=3)]:
+        for options in [dict(fail_start=True),dict(fail_save=1),dict(fail_save=2),dict(fail_save=3),dict(fail_save=4)]:
             with self.subTest(options=options):
                 containers,calls,error=self.launch_fixture(enforce_locks=True,**options)
                 self.assertIsNotNone(error)
@@ -310,14 +377,16 @@ class TransactionTests(unittest.TestCase):
         with self.assertRaises(ValueError):runtime_check.compare_parity([a,b])
 
     def test_state_write_failure_always_rolls_back_owned_containers(self):
-        for fail_at in [1,2,3]:
+        # Initial ownership save is followed by each create save and ready save.
+        for fail_at,created,stopped in [(2,1,0),(3,2,0),(4,2,2)]:
             with self.subTest(fail_at=fail_at):
                 containers,calls,error=self.launch_fixture(fail_save=fail_at)
-                self.assertIsNotNone(error)
-                self.assertTrue(containers, 'test did not reach creation')
+                self.assertIsInstance(error,OSError)
+                self.assertEqual(len(containers),created,'test did not reach intended creation phase')
                 self.assertFalse(any(d['State']['Running'] for d in containers.values()), 'owned ranks left running')
-                # Even a failed first save must perform ownership readback cleanup.
-                self.assertTrue(getattr(error,'__notes__',None) or 'cleanup' in str(error) or any(a[:2]==['docker','stop'] for a in calls), 'rollback not evidenced')
+                self.assertEqual(sum(a[:2]==['docker','stop'] for a in calls),stopped)
+                self.assertIn('ownership-checked cleanup completed',error.__notes__)
+                self.assertTrue(any('recovery state persistence failed' in note for note in error.__notes__))
 
 class MountTests(unittest.TestCase):
     def test_deleted_model_does_not_prevent_owned_stop(self):
