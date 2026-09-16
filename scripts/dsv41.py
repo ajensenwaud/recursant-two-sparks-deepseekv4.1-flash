@@ -5,25 +5,32 @@ import cluster
 from artifacts import load_json, confined, download
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 
-def release(path):
+def release(path, *, model_only=False):
     r=load_json(path)
-    if r.get('status')!='published':
+    if not isinstance(r,dict):raise ValueError('release must be an object')
+    if model_only:
+        if r.get('status')!='published' and (not isinstance(r.get('model'),dict) or r['model'].get('status')!='published'):
+            raise ValueError('Exact model artifact is not published')
+    elif r.get('status')!='published':
         raise ValueError('Release not published: image digest and exact model revision are unavailable. Use advanced local build instructions only; no substitute is selected.')
-    if not re.fullmatch(r'[a-z0-9][a-z0-9.-]+/[a-z0-9][a-z0-9._/-]*@sha256:[a-f0-9]{64}',r.get('image') or ''):
+    if not model_only and not re.fullmatch(r'[a-z0-9][a-z0-9.-]+/[a-z0-9][a-z0-9._/-]*@sha256:[a-f0-9]{64}',r.get('image') or ''):
         raise ValueError('registry image must be immutable sha256 reference')
     digest=hashlib.sha256((ROOT/'runtime/source-manifest.json').read_bytes()).hexdigest()
     if r.get('source_manifest_sha256')!=digest:
         raise ValueError('release source fingerprint does not match this checkout')
     m=r.get('model')
-    if not isinstance(m,dict) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9][A-Za-z0-9._-]*',m.get('repository') or '') or not re.fullmatch('[a-f0-9]{40}',m.get('revision') or ''):
+    if not isinstance(m,dict) or not isinstance(m.get('repository'),str) or not isinstance(m.get('revision'),str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9][A-Za-z0-9._-]*',m['repository']) or not re.fullmatch('[a-f0-9]{40}',m['revision']):
         raise ValueError('exact model repository and immutable revision required')
+    files=m.get('files')
+    if not isinstance(files,list) or not files:raise ValueError('model file manifest required')
     seen=set()
-    for row in m.get('files',[]):
+    for row in files:
+        if not isinstance(row,dict):raise ValueError('model file entry must be an object')
         name=row.get('path','')
-        if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*',name) or name in seen:
+        if not isinstance(name,str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*',name) or name in seen:
             raise ValueError('unsafe or duplicate model asset')
         seen.add(name)
-        if type(row.get('size')) is not int or row['size']<0 or not re.fullmatch('[a-f0-9]{64}',row.get('sha256') or ''):
+        if type(row.get('size')) is not int or row['size']<0 or not isinstance(row.get('sha256'),str) or not re.fullmatch('[a-f0-9]{64}',row['sha256']):
             raise ValueError('model size and SHA256 required')
     if not seen:raise ValueError('model file manifest required')
     return r
@@ -84,18 +91,18 @@ def main(argv=None):
         if a.preserve_existing_public_bind:c.update(preserve_existing_public_bind=True,api_bind='0.0.0.0',api_port=8000)
         with a.config.open('x') as f:f.write(json.dumps(c,indent=2)+'\n')
         print('Configuration created. Edit node settings; UNPUBLISHED cannot start.');return
+    if a.action=='download-model':
+        if a.destination is None:p.error('download-model requires --destination on this node')
+        download_model(release(a.release,model_only=True)['model'],a.destination);return
     local=False
     if a.action in ['pull','plan','start']:
         config=load_json(a.config)
         local=config.get('local_prebuilt') is True or ('local_prebuilt' not in config and re.fullmatch('sha256:[a-f0-9]{64}',config.get('image','')))
-    if a.action in ['pull','download-model','plan','start']:
+    if a.action in ['pull','plan','start']:
         if local:
             if a.action=='pull':raise ValueError('Local prebuilt images cannot be pulled; transfer docker save/load explicitly to both nodes.')
             r={'image':load_json(a.config)['image']}
         else:r=release(a.release)
-    if a.action=='download-model':
-        if a.destination is None:p.error('download-model requires --destination on this node')
-        download_model(r['model'],a.destination);return
     if a.action in ['stop','status']:
         cmd=[sys.executable,'-B',str(ROOT/'scripts/cluster.py'),a.action,'--config',str(a.config)]
         if a.action=='stop':cmd+=['--execute']

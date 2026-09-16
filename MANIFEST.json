@@ -28,8 +28,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 10073,
-      "sha256": "5e42d2b0460e7bddc29e4991f7e915d2b57036dc8bb2224a2c282417871c5002"
+      "bytes": 11841,
+      "sha256": "fcea86b2a5791cfa162066dea2b9f6dd3d9b255287aa46880ff037e548e0132b"
     },
     {
       "path": "configs/cluster.example.json",
@@ -223,8 +223,8 @@
     },
     {
       "path": "scripts/dsv41.py",
-      "bytes": 7523,
-      "sha256": "638002ef499d023df555b1c89c75efa11291ada6cbc9b01d60dd5be10abf4bcb"
+      "bytes": 8193,
+      "sha256": "722ee5e4461c5c813f8248fc93377fb69e2260e392247313b45194a4fc6e7f9b"
     },
     {
       "path": "scripts/prepare.py",
@@ -255,6 +255,11 @@
       "path": "tests/test_local_prebuilt.py",
       "bytes": 3034,
       "sha256": "5c8157ada4b5e2044188756ff3d490b4882fd073be301cd70fd2e9b3b0116524"
+    },
+    {
+      "path": "tests/test_model_release.py",
+      "bytes": 6122,
+      "sha256": "4b9255989caef89fbb9486f4dcf25eed921a137f6891ffdcc63465d4f9c32447"
     },
     {
       "path": "tests/test_publication.py",

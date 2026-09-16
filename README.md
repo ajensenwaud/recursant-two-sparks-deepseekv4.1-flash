@@ -2,7 +2,7 @@
 
 Prebuilt-first deployment of the retained **EXL3 MCG 2-bit / native decode / DSpark K5 / vision-enabled** configuration on two 128 GB ARM64 GB10 nodes.
 
-**Unpublished local candidate.** No downloadable release image or exact retained model revision exists in `configs/release.json` yet. Its null values are deliberate: the frontend fails before networking or starting services, rather than inventing artifacts or substituting a different pack. Cloning/importing does nothing to the system. Local build preparation is not public-release or clean-launch certification.
+**Source public; local GPU deployment verified; model upload pending; registry image unpublished.** No downloadable release image or verified Hub model revision is recorded in `configs/release.json` yet. Its null values are deliberate: artifact commands fail before networking or starting services, rather than inventing artifacts or substituting a different pack. Cloning/importing does nothing to the system. Local validation is not public artifact availability or broad quality certification.
 
 ## Normal installation: configure → obtain → start → verify
 
@@ -24,7 +24,18 @@ python3 -B scripts/dsv41.py verify
 python3 -B scripts/dsv41.py stop
 ```
 
-Today `configure` writes `UNPUBLISHED`; obtaining/starting fails with an actionable explanation. Do not change the release status or manufacture pins to bypass this gate. After publication, regenerate configuration or update its image to the exact published digest. `--config` and `--release` accept explicit files. There is **no implicit source build or conversion**. Pull verifies ARM64/Linux, the requested digest and retained-source fingerprint on both nodes. Model retrieval uses one exact revision and SHA256 allowlist, resumes interrupted files and validates model structure. Run it on each node; it does not download through the coordinator.
+Today `configure` writes `UNPUBLISHED`; obtaining/starting through the registry-release path fails with an actionable explanation. Do not change the release status or manufacture pins to bypass this gate. After image publication, regenerate configuration or update its image to the exact published digest. `--config` and `--release` accept explicit files. There is **no implicit source build or conversion**. Pull verifies ARM64/Linux, the requested digest and retained-source fingerprint on both nodes. Model retrieval uses one exact revision and SHA256 allowlist, resumes interrupted files and validates model structure. Run it on each node; it does not download through the coordinator.
+
+Model publication is independent of image publication. Once the uploader has
+verified the remote files and immutable Hub commit, release metadata can record
+`model.status: "published"`, its exact repository/revision/file manifest and the
+matching `source_manifest_sha256`, while leaving overall `status: "unpublished"`
+and `image: null`. Then `download-model --destination ...` works without a cluster
+configuration, SSH or a published image. A fully published release remains
+supported. This code path is CPU-tested with synthetic pins; the real model
+download is **not yet verified**. Until the verified metadata is recorded, it
+continues to fail closed. Model-only publication does not authorize registry
+`pull`, `plan` or `start`; the explicit local-prebuilt path remains separate.
 
 Start retains coordinated locks, ownership checks, strict remote mount validation, image-content checks, bounded startup, a 6 GiB available-memory reserve and no-new-host-OOM guard. It refuses occupied GPUs or existing names, creates worker before head, and waits for readiness. Run explicit verify for text/reasoning/two-PNG verification. Failure stops only newly owned IDs while locks remain held. Stop still works if the model directory has disappeared; it does not require published release metadata. Stopped containers/state remain for inspection: no automatic replacement or deletion.
 
@@ -72,7 +83,7 @@ Existing retained pack hashes are one-time provenance evidence, not a launch hoo
 - Dedicated trusted nodes and fabric; initial validation requires exclusive GPUs. Host networking/IPC, RDMA device access, unlimited memlock, IPC_LOCK and the retained SELinux-label override remain necessary parts of this recipe.
 - TP2; native MCG decode with ExLlama fallback; dense MXFP8 with the retained narrow FlashInfer autotuner; original BF16 head; K5 probabilistic drafting and ordinary target verification; vision enabled; HIGH thinking; 1,048,576 configured context, eight slots, 4 GiB KV/rank, 2,048 batched tokens.
 
-Security differences from the reference deployment—loopback API, read-only model mount, offline Hub and no remote-code trust/profiler flags—still require first-launch validation. The startup reserve is not a continuous watchdog or an OOM-proof guarantee. Full 1M occupancy/eight-way concurrency and broad vision quality are not certified. Historical approximately 20 tok/s is bounded single-stream evidence, not a hardware guarantee.
+The local GPU deployment exercised read-only model mounts, offline Hub and no remote-code trust/profiler flags, while explicitly preserving an already approved public bind; that does not validate every new host or default-loopback deployment. The startup reserve is not a continuous watchdog or an OOM-proof guarantee. Full 1M occupancy and broad vision quality are not certified. Measured throughput is bounded workload evidence, not a hardware guarantee.
 
 API access is head-node loopback; use a user-managed SSH tunnel or explicitly authenticated TLS proxy for remote clients. `RECIPE_API_KEY` is an optional client-only environment variable. Never put credentials in configuration, Git, build arguments or logs. API clients reject redirects. Logs can contain user requests: do not publish them.
 
@@ -97,6 +108,25 @@ Advanced local builds use `scripts/cluster.py configure|plan|start|status|stop`;
 
 The original integration license is **not selected**. Preserve `LICENSE`, `NOTICE` and all component notices, including Mia's AI Lab and AGPL plugin attribution. Owner license choice does not waive corresponding-source or CUDA/base redistribution obligations. The public base digest resolves, but its metadata says build commit `unknown`; installed vLLM identifies `179dd0fa9` and a local build-wheel path, not obtainable full corresponding source. Source provenance remains unresolved.
 
-CPU tests and mocked registry/SSH fixtures do not establish real pulls, model publication, GPU numerics, clean startup or clean-image security. Required remaining gates include real build/artifact checks, both-rank numerical/graph tests, isolated first launch and exact recovery, source/license clearance, independent review of the latest frontend changes, and authenticated publication with remote digest/revision readback. APT artifact snapshots are a disclosed source-rebuild limitation, not a fabricated blocker to a separately validated prebuilt image.
+Completed local evidence: a clean ARM64 image build and 64 in-image CPU tests;
+later frontend suites discovered 67 tests (66 passed, one skipped because Torch
+was absent locally). The actual local-prebuilt configure → plan → start → verify
+path ran on both GPUs, with text, reasoning and two PNG smokes passing before and
+after five measured concurrency cells (1, 2, 3, 4 and 8). Those were 60-second
+sustained windows with 8,192-token prompts and substantial prefix-cache reuse;
+they do not certify full-context occupancy, general answer quality or every
+kernel path. These are separate historical observations, not claims that this
+frontend-only change rebuilt or reran the GPU deployment.
+
+CPU tests and mocked registry/SSH fixtures do not establish real pulls or model
+publication. Remaining image-release gates include source/license clearance,
+distribution review and authenticated registry publication with anonymous
+digest readback. Model publication separately needs the uploader's verified
+remote allowlist and immutable revision; no Hub metadata is invented here.
+The unresolved original integration license is not a blocker to the separate
+MIT-licensed model upload. APT artifact snapshots remain a disclosed
+source-rebuild limitation, not a fabricated blocker to a separately validated
+prebuilt image. Further numerical/graph and broad quality claims require their
+own evidence.
 
 Private audits, host identities, research archives, credentials, model payloads and image archives are excluded from this tree.
