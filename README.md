@@ -2,7 +2,7 @@
 
 Prebuilt-first deployment of the retained **EXL3 MCG 2-bit / native decode / DSpark K5 / vision-enabled** configuration on two 128 GB ARM64 GB10 nodes.
 
-**Source public; local GPU deployment verified; model upload pending; registry image unpublished.** No downloadable release image or verified Hub model revision is recorded in `configs/release.json` yet. Its null values are deliberate: artifact commands fail before networking or starting services, rather than inventing artifacts or substituting a different pack. Cloning/importing does nothing to the system. Local validation is not public artifact availability or broad quality certification.
+**Source public; local GPU deployment verified; model available; registry container image pending.** The [exact retained model](https://huggingface.co/ajensenwaud/recursant-two-sparks-deepseekv4.1-flash/tree/d032e578f9ed3724e24239a79d408772620b1d9d) is pinned in `configs/release.json` at revision `d032e578f9ed3724e24239a79d408772620b1d9d`. Anonymous Hub readback verified all 53 retained files and sizes, including server LFS SHA256 for all 48 shards; bounded downloads verified the five retained metadata files by SHA256. No full model download was repeated. Overall release status remains unpublished and the image remains null: registry deployment stays gated. Cloning/importing does nothing to the system. Local validation is not broad quality certification.
 
 ## Normal installation: configure → obtain → start → verify
 
@@ -26,16 +26,23 @@ python3 -B scripts/dsv41.py stop
 
 Today `configure` writes `UNPUBLISHED`; obtaining/starting through the registry-release path fails with an actionable explanation. Do not change the release status or manufacture pins to bypass this gate. After image publication, regenerate configuration or update its image to the exact published digest. `--config` and `--release` accept explicit files. There is **no implicit source build or conversion**. Pull verifies ARM64/Linux, the requested digest and retained-source fingerprint on both nodes. Model retrieval uses one exact revision and SHA256 allowlist, resumes interrupted files and validates model structure. Run it on each node; it does not download through the coordinator.
 
-Model publication is independent of image publication. Once the uploader has
-verified the remote files and immutable Hub commit, release metadata can record
-`model.status: "published"`, its exact repository/revision/file manifest and the
-matching `source_manifest_sha256`, while leaving overall `status: "unpublished"`
-and `image: null`. Then `download-model --destination ...` works without a cluster
-configuration, SSH or a published image. A fully published release remains
-supported. This code path is CPU-tested with synthetic pins; the real model
-download is **not yet verified**. Until the verified metadata is recorded, it
-continues to fail closed. Model-only publication does not authorize registry
-`pull`, `plan` or `start`; the explicit local-prebuilt path remains separate.
+Model publication is independent of image publication. Verified release metadata
+now records `model.status: "published"`, its immutable repository/revision and
+53-file SHA256 allowlist, plus the matching `source_manifest_sha256`, while
+leaving overall `status: "unpublished"` and `image: null`.
+
+The model-only download is available now, without cluster configuration, SSH or
+a published image (358,128,021,424 bytes; run separately on each node):
+
+```bash
+python3 -B scripts/dsv41.py download-model --destination /srv/models/dsv41-exl3-mcg2
+```
+
+The production downloader was exercised on the five real pinned metadata files;
+all sizes and SHA256 hashes matched. The full 358 GB download and subsequent
+whole-model structural validation were not repeated during release integration.
+Model-only publication does not authorize registry `pull`, `plan` or `start`;
+the explicit local-prebuilt path remains separate.
 
 Start retains coordinated locks, ownership checks, strict remote mount validation, image-content checks, bounded startup, a 6 GiB available-memory reserve and no-new-host-OOM guard. It refuses occupied GPUs or existing names, creates worker before head, and waits for readiness. Run explicit verify for text/reasoning/two-PNG verification. Failure stops only newly owned IDs while locks remain held. Stop still works if the model directory has disappeared; it does not require published release metadata. Stopped containers/state remain for inspection: no automatic replacement or deletion.
 
@@ -121,8 +128,8 @@ frontend-only change rebuilt or reran the GPU deployment.
 CPU tests and mocked registry/SSH fixtures do not establish real pulls or model
 publication. Remaining image-release gates include source/license clearance,
 distribution review and authenticated registry publication with anonymous
-digest readback. Model publication separately needs the uploader's verified
-remote allowlist and immutable revision; no Hub metadata is invented here.
+digest readback. Model publication has separately passed immutable-revision,
+remote inventory and checksum verification, as described above.
 The unresolved original integration license is not a blocker to the separate
 MIT-licensed model upload. APT artifact snapshots remain a disclosed
 source-rebuild limitation, not a fabricated blocker to a separately validated

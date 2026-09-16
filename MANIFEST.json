@@ -28,8 +28,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 11841,
-      "sha256": "fcea86b2a5791cfa162066dea2b9f6dd3d9b255287aa46880ff037e548e0132b"
+      "bytes": 12227,
+      "sha256": "4c60c4ee5a43aa6685ee9747f2947554dcd86e352f3eb7a07def8e2f08f487f0"
     },
     {
       "path": "configs/cluster.example.json",
@@ -38,8 +38,8 @@
     },
     {
       "path": "configs/release.json",
-      "bytes": 313,
-      "sha256": "2d7854d5c45c382c5a55dfec04b7f0fee7282bb03cebc11a53f37240a0f77cea"
+      "bytes": 10113,
+      "sha256": "e7d21946344853077bb4ba42f6f42c06ba6ff28f61ce6da9b6781b72bf27e592"
     },
     {
       "path": "configs/source-model.json",
