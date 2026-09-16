@@ -1,9 +1,5 @@
-# DeepSeek V4.1 vision on two Sparks
-
-Run the retained **EXL3 MCG 2-bit / native decode / DSpark K5 / vision-enabled** configuration on two 128 GB ARM64 GB10 systems.
-
-**Source, exact model and prebuilt ARM64 runtime are public and pinned. Public clone-to-GPU acceptance is still pending.** The installer downloads verified artifacts without selecting a substitute model, compiling a runtime or converting weights. The existing local two-GPU deployment has passed text, reasoning and two-image smokes; that is not yet a clean public-download installation result.
-
+# DeepSeek V4.1 Flash with vision on two Sparks
+It is not fast, but it works. It is my first quantisation so bear with me.
 ## Install
 
 On the head node or a Linux coordinator with SSH access to **both** nodes:
