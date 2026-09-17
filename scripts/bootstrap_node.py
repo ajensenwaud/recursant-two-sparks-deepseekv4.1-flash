@@ -185,6 +185,29 @@ def install_image(release, cache, docker_root):
         print('Runtime image installed and pinned content verified.')
 
 
+def gpu_support(info, spec_paths=None):
+    """Prove Docker can hand a container the GPU, by either supported mechanism.
+
+    - a registered ``nvidia`` runtime: the classic nvidia-container-toolkit entry in
+      ``/etc/docker/daemon.json``, visible in ``docker info``.
+    - a CDI spec written by the toolkit: Docker 25+ injects devices from
+      ``nvidia.com/gpu`` CDI devices for ``--gpus`` with no daemon.json runtime entry
+      at all. The ASUS Ascent GX10 GB10 nodes are configured exactly this way, so
+      requiring the runtime entry rejects machines that run GPU containers fine.
+
+    Either way the caller still requires a working ``nvidia-smi`` on the node, so a
+    machine with neither mechanism - or with a driver that cannot report - fails closed.
+    """
+    if 'nvidia' in (info.get('Runtimes') or {}):
+        return 'registered nvidia runtime'
+    for spec in (spec_paths if spec_paths is not None else ['/var/run/cdi/nvidia.yaml', '/etc/cdi/nvidia.yaml']):
+        path = pathlib.Path(spec)
+        if path.is_file() and 'nvidia.com/gpu' in path.read_text(errors='replace'):
+            return 'nvidia CDI spec ' + spec
+    raise ValueError('Docker GPU support missing: no registered nvidia runtime and no nvidia.com/gpu CDI spec; '
+                     'configure NVIDIA Container Toolkit yourself')
+
+
 def preflight(data):
     node, c, release = data['node'], data['config'], data['release']
     if sys.version_info < (3, 11): raise ValueError('Python 3.11+ required on each node')
@@ -193,8 +216,7 @@ def preflight(data):
     for binary in ['docker', 'nvidia-smi', 'ip']:
         if not shutil.which(binary): raise ValueError(binary + ' missing; install prerequisites manually, then retry')
     info = json.loads(command(['docker', 'info', '--format', '{{json .}}'], timeout=30))
-    if 'nvidia' not in info.get('Runtimes', {}):
-        raise ValueError('Docker NVIDIA runtime missing; configure NVIDIA Container Toolkit yourself')
+    gpu_support(info)
     if command(['nvidia-smi', '--query-compute-apps=pid', '--format=csv,noheader'], timeout=30).strip():
         raise ValueError('Active GPU workloads; refusing installation/start; nothing is stopped automatically')
     name = c['deployment'] + '-rank' + str(data['rank'])

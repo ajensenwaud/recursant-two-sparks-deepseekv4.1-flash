@@ -28,8 +28,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 11450,
-      "sha256": "7dd13e6e299cb768474dbfb70d64848dac7618c50ef7a8835c960fac5b78b526"
+      "bytes": 11009,
+      "sha256": "b271305fbeff2139b70cb425c85ec6a97807ce5b77ebacb235d702fccd753ceb"
     },
     {
       "path": "configs/cluster.example.json",
@@ -208,8 +208,8 @@
     },
     {
       "path": "scripts/bootstrap_node.py",
-      "bytes": 11670,
-      "sha256": "1295a9b926ee90f2182c4f6c6756193fba885671da54db9719432968ade286ed"
+      "bytes": 12866,
+      "sha256": "b42deee2e054dcf2725a7c9b5bddfe5b0498008eacf02ec7f04c96b9089fabf0"
     },
     {
       "path": "scripts/build.py",
@@ -268,8 +268,8 @@
     },
     {
       "path": "tests/test_bootstrap.py",
-      "bytes": 23256,
-      "sha256": "9b25e34985f35688cb41a66ecb4c23b18e2ab6fb86fba4095d274524a1be1272"
+      "bytes": 26315,
+      "sha256": "48ccddfc6880771e8b8d7dbaeec2223cb970e590c64a174001beeffd8450a338"
     },
     {
       "path": "tests/test_existing_bind.py",

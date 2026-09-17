@@ -240,6 +240,50 @@ class PrerequisiteTests(unittest.TestCase):
         with mock.patch('bootstrap_node.platform.machine', return_value='aarch64'), mock.patch('bootstrap_node.shutil.which', return_value='/bin/tool'), mock.patch('bootstrap_node.command', side_effect=command):
             with self.assertRaisesRegex(ValueError, 'GPU'): bootstrap_node.preflight(data)
 
+    def test_gpu_support_accepts_either_docker_mechanism_and_fails_closed(self):
+        """Regression: the GB10 nodes run GPU containers through Docker CDI with no
+        daemon.json runtime entry. Requiring the runtime entry rejected a machine that
+        installs and serves fine (observed on the ASUS Ascent GB10 nodes, 2026-09-17)."""
+        import bootstrap_node
+        self.assertEqual(bootstrap_node.gpu_support({'Runtimes': {'nvidia': {'path': 'nvidia-container-runtime'}}}),
+                         'registered nvidia runtime')
+        with tempfile.TemporaryDirectory() as td:
+            spec = pathlib.Path(td)/'nvidia.yaml'
+            empty = pathlib.Path(td)/'empty.yaml'; empty.write_text('kind: something-else\n')
+            with self.assertRaisesRegex(ValueError, 'nvidia.com/gpu'):
+                bootstrap_node.gpu_support({'Runtimes': {'runc': {}}}, [str(empty)])
+            with self.assertRaisesRegex(ValueError, 'nvidia.com/gpu'):
+                bootstrap_node.gpu_support({'Runtimes': {'runc': {}}}, [str(spec)])
+            spec.write_text('kind: nvidia.com/gpu\n')
+            self.assertEqual(bootstrap_node.gpu_support({'Runtimes': {'runc': {}}}, [str(spec)]),
+                             'nvidia CDI spec ' + str(spec))
+
+    def test_preflight_passes_on_a_cdi_only_node_without_running_container_commands(self):
+        import bootstrap_node
+        c = json.loads((ROOT/'configs/cluster.example.json').read_text())
+        with tempfile.TemporaryDirectory() as td:
+            root = pathlib.Path(td)
+            spec = root/'nvidia.yaml'; spec.write_text('kind: nvidia.com/gpu\n')
+            c['nodes'][0].update(model_path=str(root/'model'), cache_path=str(root/'cache'))
+            data = {'node': c['nodes'][0], 'rank': 0, 'config': c, 'release': ArchiveInstallTests().fixture()}
+            calls = []
+            def command(args, **kwargs):
+                calls.append(args)
+                if args[:2] == ['docker', 'info']: return json.dumps({'Runtimes': {'runc': {}}, 'DockerRootDir': str(root)})
+                if args[0] == 'ip': return json.dumps([{'addr_info': [{'local': c['nodes'][0]['fabric_ip']}]}])
+                return ''
+            original = pathlib.Path.is_dir
+            def is_dir(path): return True if str(path).startswith(('/sys/', '/dev/')) else original(path)
+            real = bootstrap_node.gpu_support
+            with mock.patch('bootstrap_node.platform.machine', return_value='aarch64'), \
+                 mock.patch('bootstrap_node.shutil.which', return_value='/bin/tool'), \
+                 mock.patch('bootstrap_node.command', side_effect=command), \
+                 mock.patch('pathlib.Path.is_dir', is_dir), \
+                 mock.patch('bootstrap_node.gpu_support', lambda info: real(info, [str(spec)])), \
+                 mock.patch('bootstrap_node.RESERVE', 0):
+                self.assertEqual(bootstrap_node.preflight(data), str(root))
+            self.assertFalse(any(x in ['rm', 'stop', 'create', 'start', 'load', 'pull'] for call in calls for x in call))
+
     def test_ssh_never_accepts_unknown_host_keys(self):
         import cluster
         with mock.patch('cluster.subprocess.run', return_value=subprocess.CompletedProcess([], 0, '', '')) as run:
